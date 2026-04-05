@@ -4,7 +4,8 @@
  */
 
 const STYLE_PREFIX = `
-CRITICAL: Generate an ultra-realistic photograph that looks like it was taken with a professional DSLR camera (Canon EOS R5 or Sony A7R IV).
+CRITICAL COMPOSITION: The female bride MUST ALWAYS be positioned on the LEFT side of the image, and the male groom MUST ALWAYS be positioned on the RIGHT side of the image. This is technically mandatory for face-swap tracking.
+CRITICAL DESIGN: Generate an ultra-realistic photograph that looks like it was taken with a professional DSLR camera (Canon EOS R5 or Sony A7R IV).
 Maintain the EXACT facial features, skin tone, hair, body proportions and unique characteristics from the reference images.
 Photo style: 35mm f/1.4 lens, shallow depth of field, natural golden hour lighting, 
 warm film color grading, genuine skin textures with pores visible, natural hair strands,

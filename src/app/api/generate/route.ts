@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { genAI, GEMINI_MODEL } from '@/lib/gemini/client';
 import { createServiceClient } from '@/lib/supabase/server';
-import { generateCoupleWithFaces } from '@/lib/replicate/instant-id';
+import { swapCoupleFaces } from '@/lib/replicate/face-swap';
 import {
   buildSnapshotPrompt,
   buildStylingPrompt,
@@ -211,39 +211,38 @@ The ${referenceImages.length} reference photo(s) above show the REAL people who 
 
           let finalUrl = urlData.publicUrl;
 
-          // InstantID: generate face-consistent image using reference photos
+          // Multi-Face Swap: replace faces using FaceFusion
           if (refUrls.her && refUrls.him) {
             try {
-              console.log(`[InstantID] Generating face-consistent image for ${step}...`);
-              const instantIdUrl = await generateCoupleWithFaces(
+              console.log(`[FaceSwap-Multi] Swapping faces for ${step}...`);
+              const swappedUrl = await swapCoupleFaces(
                 refUrls.her,
                 refUrls.him,
-                prompt,
-                finalUrl // Gemini image as fallback
+                finalUrl
               );
               
-              // If InstantID succeeded, save to storage
-              if (instantIdUrl !== finalUrl && instantIdUrl.startsWith('http')) {
-                const idRes = await fetch(instantIdUrl);
-                const idBuffer = Buffer.from(await idRes.arrayBuffer());
-                const idName = `generated/${sessionId}/${step}/instant_${crypto.randomUUID()}.png`;
+              // If swap succeeded, save to storage
+              if (swappedUrl !== finalUrl && swappedUrl.startsWith('http')) {
+                const swapRes = await fetch(swappedUrl);
+                const swapBuffer = Buffer.from(await swapRes.arrayBuffer());
+                const swapName = `generated/${sessionId}/${step}/swap_${crypto.randomUUID()}.png`;
                 
                 await supabase.storage
                   .from('merryme')
-                  .upload(idName, idBuffer, {
+                  .upload(swapName, swapBuffer, {
                     contentType: 'image/png',
                     upsert: true,
                   });
 
-                const { data: idUrlData } = supabase.storage
+                const { data: swapUrlData } = supabase.storage
                   .from('merryme')
-                  .getPublicUrl(idName);
+                  .getPublicUrl(swapName);
 
-                finalUrl = idUrlData.publicUrl;
-                console.log('[InstantID] Saved face-consistent image');
+                finalUrl = swapUrlData.publicUrl;
+                console.log('[FaceSwap-Multi] Saved swapped image');
               }
-            } catch (idErr) {
-              console.error('[InstantID] Error, using Gemini original:', idErr);
+            } catch (swapErr) {
+              console.error('[FaceSwap-Multi] Error, using Gemini original:', swapErr);
               // Keep original Gemini image
             }
           }

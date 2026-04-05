@@ -76,8 +76,8 @@ function extractUrl(output: unknown): string | null {
 }
 
 /**
- * Swap faces for a couple (both her and him) onto a generated scene.
- * Applies her face first, then him face on the result.
+ * Swap faces for a couple onto a generated scene using indexed Multi-Face Swap.
+ * Relies on Gemini prompt constraint: Bride is always left (index 0), Groom is right (index 1).
  */
 export async function swapCoupleFaces(
   herSourceUrl: string,
@@ -85,17 +85,40 @@ export async function swapCoupleFaces(
   targetImageUrl: string
 ): Promise<string> {
   try {
-    // Step 1: Swap her face (bride — usually the main female face)
-    console.log('[FaceSwap] Step 1: Swapping bride face...');
-    const afterHer = await swapFace(herSourceUrl, targetImageUrl);
+    const MODEL_ID = 'mertguvencli/face-swap-with-indexes:518f2116425c40acb5c234031c55daf843c1357eff784370fe9489e57b65c150';
 
-    // Step 2: Swap him face on the result (groom — usually the main male face)
-    console.log('[FaceSwap] Step 2: Swapping groom face...');
-    const afterBoth = await swapFace(himSourceUrl, afterHer);
+    // Step 1: Swap Bride's face (Target Index 0)
+    console.log('[FaceSwap-Multi] Step 1: Swapping Bride (Index 0)...');
+    const brideSwapOutput = await replicate.run(MODEL_ID, {
+      input: {
+        source_image: herSourceUrl,
+        target_image: targetImageUrl,
+        source_face_index: 0,
+        target_face_indices: "0",
+      },
+    });
+    
+    const brideResultUrl = extractUrl(brideSwapOutput);
+    if (!brideResultUrl) throw new Error('Bride swap failed to return a URL');
 
-    return afterBoth;
+    // Step 2: Swap Groom's face onto the result (Target Index 1)
+    console.log('[FaceSwap-Multi] Step 2: Swapping Groom (Index 1)...');
+    const groomSwapOutput = await replicate.run(MODEL_ID, {
+      input: {
+        source_image: himSourceUrl,
+        target_image: brideResultUrl,
+        source_face_index: 0,
+        target_face_indices: "1",
+      },
+    });
+
+    const finalResultUrl = extractUrl(groomSwapOutput);
+    if (!finalResultUrl) return brideResultUrl; // At least bride is swapped
+
+    console.log('[FaceSwap-Multi] Couple swap successful!');
+    return finalResultUrl;
   } catch (error) {
-    console.error('[FaceSwap] Couple swap error:', error);
-    return targetImageUrl;
+    console.error('[FaceSwap-Multi] Couple swap error:', error);
+    return targetImageUrl; // Fallback to original
   }
 }
