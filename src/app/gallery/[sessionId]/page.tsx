@@ -286,12 +286,18 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
     exportVideo(allUrls, `MerryMe_Wedding_${sessionId.slice(0, 8)}.webm`);
   }, [user, isPaid, exportVideo, sessionId]);
 
+  const handleVideoView = useCallback(() => {
+    if (!user) { setShowLoginModal(true); return; }
+    if (!isPaid) { setShowPaymentModal(true); return; }
+    setShowSlideshow(true);
+  }, [user, isPaid]);
+
   const handleCheckout = useCallback(async () => {
     setCheckingPayment(true);
     try {
       const PortOne = await import('@portone/browser-sdk/v2');
       const paymentId = `merryme_${sessionId.slice(0, 8)}_${Date.now()}`;
-      const AMOUNT = 1500; // 1,500원
+      const AMOUNT = 1000; // 1,000원 ($1)
 
       const response = await PortOne.requestPayment({
         storeId: process.env.NEXT_PUBLIC_PORTONE_STORE_ID || '',
@@ -415,11 +421,11 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
             <div className={styles.paymentBadge}>Premium</div>
             <h3 className={styles.paymentTitle}>영상 다운로드</h3>
             <p className={styles.paymentDesc}>
-              1080p 고화질 웨딩 영상을<br />다운로드 받으세요
+              영상 생성 및 무제한 다운로드 혜택을 누리세요
             </p>
             <div className={styles.priceBox}>
-              <span className={styles.priceAmount}>₩1,500</span>
-              <span className={styles.priceLabel}>1회 결제</span>
+              <span className={styles.priceAmount}>단돈 $1</span>
+              <span className={styles.priceLabel}>(1,000원) / 1회 결제</span>
             </div>
             <ul className={styles.priceFeatures}>
               <li>1080p Full HD 영상</li>
@@ -432,7 +438,7 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
               disabled={checkingPayment}
               style={{ width: '100%', whiteSpace: 'nowrap' }}
             >
-              {checkingPayment ? '결제 준비 중...' : '1,500원 결제하고 다운로드'}
+              {checkingPayment ? '결제 준비 중...' : '단돈 $1에 결제하고 영상 보기'}
             </button>
             <button className={styles.paymentCancel} onClick={() => setShowPaymentModal(false)}>
               다음에 할게요
@@ -477,7 +483,7 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
           {/* Bottom Actions */}
           {hasImages && (
             <div className={styles.bottomActions}>
-              <button className="btn btn-primary btn-large" onClick={() => setShowSlideshow(true)} style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }}>
+              <button className="btn btn-primary btn-large" onClick={handleVideoView} style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }}>
                 영상으로 보기
               </button>
               <button
@@ -490,7 +496,7 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
                   ? `영상 생성 중... ${videoProgress}%`
                   : isPaid
                     ? '영상 다운로드 (1080p)'
-                    : '영상 다운로드 (₩1,500)'}
+                    : '영상 다운로드 (단돈 $1)'}
               </button>
               <a href="/" className="btn btn-ghost" style={{ whiteSpace: 'nowrap' }}>
                 처음으로 돌아가기
