@@ -182,6 +182,15 @@ function SnapshotsContent() {
 
   return (
     <div className={styles.content}>
+      <button
+        className={styles.homeBtn}
+        onClick={() => router.push('/')}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+        메인으로
+      </button>
       <StepIndicator currentStep={2} />
 
       <div className={styles.headerSection}>

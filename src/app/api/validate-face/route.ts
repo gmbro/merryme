@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     const expectedGender = type === 'her' ? '여성' : '남성';
     const label = type === 'her' ? '신부' : '신랑';
 
-    // Use Gemini to analyze the face + gender + body
+    // Use Gemini to analyze the face + gender + body (fast model)
     const response = await genAI.models.generateContent({
       model: 'gemini-2.5-flash-preview-04-17',
       contents: [{

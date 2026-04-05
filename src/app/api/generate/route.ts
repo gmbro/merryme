@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
         // Rate limit — retry with aggressive backoff
         if (errMsg.includes('429') || errMsg.includes('RATE') || errMsg.includes('quota') || errMsg.includes('RESOURCE_EXHAUSTED')) {
           if (attempt < MAX_RETRIES - 1) {
-            const delays = [5000, 15000, 30000]; // 5s, 15s, 30s
+            const delays = [2000, 5000, 10000]; // 2s, 5s, 10s
             const delay = delays[attempt] || 30000;
             console.log(`Rate limited, waiting ${delay}ms before retry (attempt ${attempt + 1})...`);
             await new Promise(r => setTimeout(r, delay));
