@@ -119,6 +119,14 @@
   font-weight: 700;
 }
 
+.uploadValidating {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: 0.78rem;
+}
 /* Heart Divider */
 .heartArea {
   display: flex;

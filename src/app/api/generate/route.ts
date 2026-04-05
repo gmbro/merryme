@@ -112,13 +112,39 @@ export async function POST(request: NextRequest) {
     contents.push({ text: prompt });
 
     // Call Gemini API
-    const response = await genAI.models.generateContent({
-      model: GEMINI_MODEL,
-      contents: [{ role: 'user', parts: contents }],
-      config: {
-        responseModalities: ['TEXT', 'IMAGE'],
-      },
-    });
+    let response;
+    try {
+      response = await genAI.models.generateContent({
+        model: GEMINI_MODEL,
+        contents: [{ role: 'user', parts: contents }],
+        config: {
+          responseModalities: ['TEXT', 'IMAGE'],
+        },
+      });
+    } catch (apiError) {
+      const errMsg = apiError instanceof Error ? apiError.message : String(apiError);
+      console.error('Gemini API call error:', errMsg);
+      
+      if (errMsg.includes('SAFETY') || errMsg.includes('safety')) {
+        return NextResponse.json(
+          { error: 'AI 안전 정책에 의해 이미지를 생성할 수 없었어요. 다른 테마를 선택해 보세요.' },
+          { status: 400 }
+        );
+      }
+      if (errMsg.includes('quota') || errMsg.includes('429') || errMsg.includes('RATE')) {
+        return NextResponse.json(
+          { error: 'API 요청 한도를 초과했어요. 잠시 후 다시 시도해주세요.' },
+          { status: 429 }
+        );
+      }
+      if (errMsg.includes('not found') || errMsg.includes('404')) {
+        return NextResponse.json(
+          { error: 'AI 모델을 찾을 수 없어요. 관리자에게 문의해주세요.' },
+          { status: 500 }
+        );
+      }
+      throw apiError;
+    }
 
     // Extract generated images
     const generatedImages: string[] = [];
@@ -146,6 +172,24 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    if (generatedImages.length === 0) {
+      // Check if there's a text response explaining why
+      const textParts = response.candidates?.[0]?.content?.parts?.filter(
+        (p: { text?: string }) => p.text
+      );
+      const textMsg = textParts?.map((p: { text?: string }) => p.text).join(' ') || '';
+      console.error('No images generated. Text response:', textMsg);
+      
+      return NextResponse.json({
+        success: false,
+        images: [],
+        error: '이미지를 생성하지 못했어요. 다른 테마로 다시 시도해주세요.',
+        detail: textMsg,
+        prompt,
+        step,
+      });
+    }
+
     return NextResponse.json({
       success: true,
       images: generatedImages,
@@ -154,10 +198,11 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Generate API error:', error);
+    const detail = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
       {
-        error: 'AI 이미지 생성 중 오류가 발생했습니다.',
-        detail: error instanceof Error ? error.message : String(error),
+        error: 'AI 이미지 생성 중 오류가 발생했어요. 다시 시도해주세요.',
+        detail,
       },
       { status: 500 }
     );

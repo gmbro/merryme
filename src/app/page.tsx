@@ -72,62 +72,18 @@ const JOURNEY_STEPS = [
   { icon: <IconGallery />, title: '추억 갤러리' },
 ];
 
-/* ─── 얼굴 감지 (FaceDetector API + fallback) ─── */
-async function detectSinglePerson(file: File): Promise<{ ok: boolean; reason?: string }> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = async () => {
-      // 1) 너무 작은 이미지 거부
-      if (img.width < 200 || img.height < 200) {
-        resolve({ ok: false, reason: '이미지가 너무 작아요. 최소 200x200 이상의 사진을 올려주세요.' });
-        return;
-      }
-
-      // 2) FaceDetector API 사용 (Chrome/Edge 지원)
-      if (typeof window !== 'undefined' && 'FaceDetector' in window) {
-        try {
-          // @ts-expect-error FaceDetector is not in TS types
-          const detector = new window.FaceDetector({ maxDetectedFaces: 5 });
-          const faces = await detector.detect(img);
-
-          if (faces.length === 0) {
-            resolve({ ok: false, reason: '얼굴이 감지되지 않았어요. 얼굴이 잘 보이는 사진을 올려주세요.' });
-            return;
-          }
-          if (faces.length > 1) {
-            resolve({ ok: false, reason: `얼굴이 ${faces.length}명 감지되었어요. 한 명만 나온 사진을 올려주세요.` });
-            return;
-          }
-
-          // 얼굴 크기 체크 — 너무 작으면 멀리서 찍은 사진
-          const face = faces[0];
-          const faceArea = face.boundingBox.width * face.boundingBox.height;
-          const imgArea = img.width * img.height;
-          const faceRatio = faceArea / imgArea;
-
-          if (faceRatio < 0.01) {
-            resolve({ ok: false, reason: '얼굴이 너무 작게 나와요. 상반신 이상이 보이는 가까이서 찍은 사진을 올려주세요.' });
-            return;
-          }
-
-          resolve({ ok: true });
-          return;
-        } catch {
-          // FaceDetector 실패 시 fallback
-        }
-      }
-
-      // 3) Fallback: 기본 비율 체크만
-      const ratio = img.width / img.height;
-      if (ratio > 2.5) {
-        resolve({ ok: false, reason: '파노라마 사진은 사용할 수 없어요. 인물 사진을 올려주세요.' });
-        return;
-      }
-      resolve({ ok: true });
-    };
-    img.onerror = () => resolve({ ok: true });
-    img.src = URL.createObjectURL(file);
-  });
+/* ─── 서버 얼굴 검증 (Gemini API) ─── */
+async function validateFaceServer(file: File, type: 'her' | 'him'): Promise<{ valid: boolean; reason?: string }> {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', type);
+    const res = await fetch('/api/validate-face', { method: 'POST', body: formData });
+    if (!res.ok) return { valid: true }; // 서버 오류 시 허용
+    return await res.json();
+  } catch {
+    return { valid: true }; // 네트워크 오류 시 허용
+  }
 }
 
 /* ─── Image Guide 모달 ─── */
@@ -196,6 +152,7 @@ export default function LandingPage() {
   const [isStarting, setIsStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showGuide, setShowGuide] = useState(false);
+  const [validating, setValidating] = useState<'her' | 'him' | null>(null);
   const herInputRef = useRef<HTMLInputElement>(null);
   const himInputRef = useRef<HTMLInputElement>(null);
 
@@ -211,10 +168,13 @@ export default function LandingPage() {
       return;
     }
 
-    // 얼굴/체형 감지
-    const detection = await detectSinglePerson(file);
-    if (!detection.ok) {
-      setError(detection.reason || '적합한 사진이 아니에요.');
+    // 얼굴/체형 검증 (Gemini API - 서버 사이드)
+    setValidating(type);
+    setError(null);
+    const result = await validateFaceServer(file, type);
+    setValidating(null);
+    if (!result.valid) {
+      setError(result.reason || '적합한 사진이 아니에요.');
       if (type === 'her' && herInputRef.current) herInputRef.current.value = '';
       if (type === 'him' && himInputRef.current) himInputRef.current.value = '';
       return;
@@ -318,7 +278,12 @@ export default function LandingPage() {
                 />
               </label>
               <span className={styles.uploadLabelText}>
-                {herPreview ? (
+                {validating === 'her' ? (
+                  <span className={styles.uploadValidating}>
+                    <span className="loader-ring" style={{ width: 14, height: 14, borderWidth: 2 }} />
+                    사진 확인 중...
+                  </span>
+                ) : herPreview ? (
                   <span className={styles.uploadDone}>업로드 완료</span>
                 ) : (
                   '신부 사진을 업로드해주세요'
@@ -351,7 +316,12 @@ export default function LandingPage() {
                 />
               </label>
               <span className={styles.uploadLabelText}>
-                {himPreview ? (
+                {validating === 'him' ? (
+                  <span className={styles.uploadValidating}>
+                    <span className="loader-ring" style={{ width: 14, height: 14, borderWidth: 2 }} />
+                    사진 확인 중...
+                  </span>
+                ) : himPreview ? (
                   <span className={styles.uploadDone}>업로드 완료</span>
                 ) : (
                   '신랑 사진을 업로드해주세요'

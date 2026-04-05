@@ -111,22 +111,34 @@ function SnapshotsContent() {
         const data = await res.json();
         if (!res.ok) {
           console.error(`Theme ${selectedThemes[i]} error:`, data);
+          // Show specific error to user
+          if (data.error) {
+            setError(data.error);
+          }
           continue; // skip failed, continue with others
         }
 
-        if (data.images) {
+        if (data.images && data.images.length > 0) {
           newImages.push(...data.images);
           setImages((prev) => [...prev, ...data.images]);
+        } else if (data.error) {
+          console.error(`Theme ${selectedThemes[i]}: ${data.error}`);
+          setError(data.error);
         }
       } catch (err) {
         console.error(`Generate error for theme ${selectedThemes[i]}:`, err);
+        if (err instanceof TypeError && err.message === 'Failed to fetch') {
+          setError('서버에 연결할 수 없어요. 인터넷 연결을 확인해주세요.');
+        }
       }
     }
 
     setProgress(100);
 
-    if (newImages.length === 0) {
-      setError('이미지 생성에 실패했습니다. 다시 시도해주세요.');
+    if (newImages.length === 0 && !error) {
+      setError('이미지 생성에 실패했어요. 다른 테마로 다시 시도해주세요.');
+    } else if (newImages.length > 0 && newImages.length < total) {
+      setError(`${newImages.length}/${total}장만 생성되었어요. 일부 테마에서 오류가 있었습니다.`);
     }
     setGenerating(false);
   };
