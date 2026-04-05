@@ -354,7 +354,7 @@ export default function LandingPage() {
                 {herPreview ? (
                   <img src={herPreview} alt="신부" className={styles.previewImg} />
                 ) : (
-                  <IconBride />
+                  <img src="/guide-bride.png" alt="가이드" className={styles.guideImg} />
                 )}
                 <input
                   ref={herInputRef}
@@ -392,7 +392,7 @@ export default function LandingPage() {
                 {himPreview ? (
                   <img src={himPreview} alt="신랑" className={styles.previewImg} />
                 ) : (
-                  <IconGroom />
+                  <img src="/guide-groom.png" alt="가이드" className={styles.guideImg} />
                 )}
                 <input
                   ref={himInputRef}
