@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Header from '@/components/layout/Header';
+
 import StepIndicator from '@/components/layout/StepIndicator';
 import styles from './page.module.css';
 
@@ -192,7 +192,7 @@ function HoneymoonContent() {
 export default function HoneymoonPage() {
   return (
     <>
-      <Header />
+
       <main className={styles.main}>
         <div className="container">
           <Suspense fallback={<div className={styles.loading}><span className="loader-ring" /></div>}>

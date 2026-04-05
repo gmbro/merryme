@@ -26,6 +26,7 @@ interface GenerateBody {
     venueStyle?: string;
     destination?: string;
     scene?: string;
+    angleIndex?: number;
   };
 }
 
@@ -88,12 +89,13 @@ export async function POST(request: NextRequest) {
         );
         break;
       case 'venue':
-        prompt = buildVenuePrompt(options.venueStyle || 'elegant garden wedding');
+        prompt = buildVenuePrompt(options.venueStyle || 'elegant garden wedding', options.angleIndex || 0);
         break;
       case 'honeymoon':
         prompt = buildHoneymoonPrompt(
           options.destination || '파리',
-          options.scene || '에펠탑 앞에서 다정하게 사진을 찍는 모습'
+          options.scene || '에펠탑 앞에서 다정하게 사진을 찍는 모습',
+          options.angleIndex || 0
         );
         break;
     }

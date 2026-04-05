@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Header from '@/components/layout/Header';
+
 import StepIndicator from '@/components/layout/StepIndicator';
 import styles from './page.module.css';
 
@@ -68,21 +68,30 @@ function VenueContent() {
     if (!venueData) return;
     setGenerating(true);
     setError(null);
+    setImages([]);
 
     try {
-      const res = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId,
-          step: 'venue',
-          options: { venueStyle: venueData.style },
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '이미지 생성 실패');
-      setImages((prev) => [...prev, ...data.images]);
+      // Generate 4 images with different angles
+      const angleCount = 4;
+      for (let i = 0; i < angleCount; i++) {
+        try {
+          const res = await fetch('/api/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sessionId,
+              step: 'venue',
+              options: { venueStyle: venueData.style, angleIndex: i },
+            }),
+          });
+          const data = await res.json();
+          if (res.ok && data.images) {
+            setImages((prev) => [...prev, ...data.images]);
+          }
+        } catch {
+          // continue with other angles
+        }
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : '오류 발생');
     } finally {
@@ -331,7 +340,7 @@ function VenueContent() {
 export default function VenuePage() {
   return (
     <>
-      <Header />
+
       <main className={styles.main}>
         <div className="container">
           <Suspense fallback={<div className={styles.loading}><span className="loader-ring" /></div>}>

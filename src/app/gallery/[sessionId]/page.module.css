@@ -94,8 +94,8 @@
 .actionBar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: var(--space-xl) 0;
+  justify-content: center;
+  padding: var(--space-2xl) 0;
   flex-wrap: wrap;
   gap: var(--space-md);
 }
@@ -637,19 +637,108 @@
   text-align: center;
 }
 
+/* Play & Download Buttons */
+.playBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  background: linear-gradient(135deg, #2c2c2c, #1a1a1a);
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.playBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.downloadBtn {
+  padding: 14px 32px;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.downloadBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+.downloadBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Zoom Modal */
+.zoomOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  cursor: pointer;
+}
+.zoomImage {
+  max-width: 95vw;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+.zoomClose {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: #fff;
+  font-size: 1.5rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+
+/* Pause Icon */
+.pauseIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 50%;
+  backdrop-filter: blur(4px);
+}
+
+/* Login Modal */
+.loginIcon {
+  font-size: 3rem;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .hero {
-    min-height: 260px;
+    min-height: 220px;
   }
 
   .actionBar {
     flex-direction: column;
     align-items: stretch;
-  }
-
-  .actionRight {
-    justify-content: center;
   }
 
   .imageGrid {

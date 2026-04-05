@@ -91,25 +91,42 @@ ${STYLE_PREFIX}
 `.trim();
 }
 
-export function buildVenuePrompt(venueStyle: string): string {
+export function buildVenuePrompt(venueStyle: string, angleIndex: number = 0): string {
+  const angles = [
+    'Wide establishing shot from the back of the aisle, showing the full venue and the couple standing before the officiant at the altar',
+    'Medium shot from the side, showing the couple facing each other at the altar with the officiant behind them, exchanging vows',
+    'Close-up shot of the couple from slightly behind, looking at each other with warm emotion, officiant slightly blurred in background',
+    'Three-quarter angle shot showing the couple, guests in seats, flower decorations, capturing the full ceremony atmosphere',
+  ];
+  const angle = angles[angleIndex % angles.length];
+
   return `
-Create a wedding ceremony scene of the couple from the reference images.
-Venue style: ${venueStyle}.
-The bride is in a white wedding dress and the groom is in a black tuxedo.
-They are standing at the altar, facing each other, exchanging vows.
-Guests are seated, flower petals in the air, warm natural light.
-Composition: Wide shot showing the venue atmosphere, 16:9 aspect ratio.
+Create an ultra-realistic wedding ceremony photograph.
+Venue: ${venueStyle}.
+Scene: ${angle}.
+The couple is standing naturally before the officiant/minister. They look genuinely emotional and happy.
+Details: Flower arrangements, guest seating, warm ambient lighting, realistic fabric textures on the wedding dress.
 ${STYLE_PREFIX}
+Generate one stunning, photorealistic wedding ceremony photograph.
 `.trim();
 }
 
-export function buildHoneymoonPrompt(destination: string, scene: string): string {
+export function buildHoneymoonPrompt(destination: string, scene: string, angleIndex: number = 0): string {
+  const angles = [
+    'Wide establishing shot showing the couple and the scenic destination background',
+    'Medium shot of the couple walking together, candid and relaxed',
+    'Close-up portrait of the couple smiling at the camera with the destination behind them',
+    'Over-the-shoulder shot from behind the couple, looking out at the beautiful scenery',
+  ];
+  const angle = angles[angleIndex % angles.length];
+
   return `
-Create a honeymoon travel snapshot of the couple from the reference images.
+Create an ultra-realistic honeymoon travel photograph.
 Location: ${destination} — ${scene}.
-The couple is casually dressed, relaxed and happy, enjoying their honeymoon.
-Natural travel photography style, candid moments.
-Composition: 4:3 aspect ratio.
+Camera angle: ${angle}.
+The couple is casually dressed, relaxed and naturally happy, genuine candid moment.
+Natural travel photography, golden hour lighting, DSLR quality.
 ${STYLE_PREFIX}
+Generate one photorealistic honeymoon snapshot.
 `.trim();
 }
