@@ -1,0 +1,224 @@
+.main {
+  padding-top: 80px;
+  min-height: 100vh;
+  background: var(--color-bg-cream);
+}
+
+.content {
+  padding: var(--space-xl) 0 var(--space-4xl);
+}
+
+.headerSection {
+  text-align: center;
+  margin-bottom: var(--space-3xl);
+}
+
+.headerSection h1 { margin-top: var(--space-md); }
+
+.subtitle {
+  margin-top: var(--space-md);
+  color: var(--color-text-secondary);
+  font-size: 1.05rem;
+}
+
+.noSession, .loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-4xl) 0;
+  gap: var(--space-lg);
+  color: var(--color-text-secondary);
+}
+
+/* Destination Grid */
+.destSection { margin-bottom: var(--space-xl); }
+
+.destGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+}
+
+.destCard {
+  text-align: center;
+  padding: var(--space-xl);
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all var(--transition-base);
+}
+
+.destCard:hover {
+  border-color: var(--color-primary-light);
+  transform: translateY(-4px);
+}
+
+.destSelected {
+  border-color: var(--color-primary) !important;
+  background: linear-gradient(135deg, #FFF9F3, #FFF3E8) !important;
+  box-shadow: var(--shadow-gold) !important;
+}
+
+.destEmoji {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: var(--space-md);
+}
+
+.destName {
+  font-weight: 700;
+  font-size: 1.15rem;
+  display: block;
+  margin-bottom: var(--space-xs);
+}
+
+.destScenes {
+  font-size: 0.8rem;
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+/* Generate */
+.generateSection {
+  text-align: center;
+  margin-bottom: var(--space-3xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.progressHint {
+  font-size: 0.9rem;
+  color: var(--color-primary);
+  font-weight: 600;
+  animation: pulse-glow 1.5s ease infinite;
+}
+
+.errorMsg {
+  color: var(--color-error);
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+/* Gallery */
+.sectionTitle {
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  margin-bottom: var(--space-xl);
+  text-align: center;
+}
+
+.gallerySection { animation: slideUp 0.5s ease; }
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-xl);
+  margin-bottom: var(--space-3xl);
+}
+
+.imageCard {
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base);
+  background: white;
+}
+
+.imageCard:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+}
+
+.generatedImage {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+}
+
+.imageCaption {
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.88rem;
+  color: var(--color-text-secondary);
+}
+
+.captionNum {
+  font-weight: 700;
+  color: var(--color-primary);
+  font-size: 0.8rem;
+}
+
+/* Complete */
+.completeSection {
+  text-align: center;
+  padding: var(--space-3xl);
+  background: linear-gradient(135deg, #FFF9F3, #FFF3E8, #FFF0F5);
+  border-radius: var(--radius-xl);
+  animation: slideUp 0.8s ease;
+}
+
+.completeEmoji {
+  font-size: 4rem;
+  margin-bottom: var(--space-md);
+  animation: float 3s ease-in-out infinite;
+}
+
+.completeTitle {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  color: var(--color-primary);
+  margin-bottom: var(--space-md);
+}
+
+.completeDesc {
+  color: var(--color-text-secondary);
+  line-height: 1.8;
+  margin-bottom: var(--space-xl);
+  font-size: 1.05rem;
+}
+
+.completeActions {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Custom Destination Input */
+.customInput {
+  margin-top: var(--space-lg);
+  display: flex;
+  justify-content: center;
+}
+
+.customInputField {
+  width: 100%;
+  max-width: 480px;
+  padding: 14px 20px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-border);
+  font-size: 1rem;
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  background: #fff;
+  transition: all var(--transition-base);
+}
+
+.customInputField:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px var(--color-primary-glow);
+}
+
+.customInputField::placeholder {
+  color: var(--color-text-light);
+}
+
+@media (max-width: 768px) {
+  .destGrid { grid-template-columns: repeat(2, 1fr); }
+  .gallery { grid-template-columns: 1fr; }
+  .completeActions { flex-direction: column; align-items: center; }
+}

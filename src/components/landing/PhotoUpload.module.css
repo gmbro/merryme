@@ -1,0 +1,31 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.sublabel {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.dragging {
+  border-color: var(--color-primary) !important;
+  background: rgba(212, 165, 116, 0.1) !important;
+  box-shadow: var(--shadow-glow) !important;
+  transform: scale(1.05);
+}
+
+.changeBtn {
+  font-size: 0.8rem;
+  color: var(--color-primary);
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.changeBtn:hover {
+  color: var(--color-primary-hover);
+}
