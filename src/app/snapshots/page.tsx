@@ -6,23 +6,66 @@ import Header from '@/components/layout/Header';
 import StepIndicator from '@/components/layout/StepIndicator';
 import styles from './page.module.css';
 
+/* ─── Theme Preview Images (Unsplash) ─── */
 const THEMES = [
-  { id: 'cherry_blossom' as const, emoji: '🌸', name: '봄날의 벚꽃', desc: '만개한 벚꽃 아래에서' },
-  { id: 'beach_sunset' as const, emoji: '🏖️', name: '해변 선셋', desc: '석양이 지는 해변에서' },
-  { id: 'classic_studio' as const, emoji: '🏛️', name: '클래식 스튜디오', desc: '부드러운 스튜디오 조명' },
-  { id: 'forest_garden' as const, emoji: '🌿', name: '숲속 가든', desc: '초록 자연 속에서' },
-  { id: 'city_night' as const, emoji: '🌙', name: '도심 야경', desc: '시네마틱 도시 야경' },
+  {
+    id: 'cherry_blossom' as const,
+    name: '봄날의 벚꽃',
+    desc: '만개한 벚꽃 아래에서',
+    preview: 'https://images.unsplash.com/photo-1522748906645-95d8adfd52c7?w=400&h=300&fit=crop',
+  },
+  {
+    id: 'beach_sunset' as const,
+    name: '해변 선셋',
+    desc: '석양이 지는 해변에서',
+    preview: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&h=300&fit=crop',
+  },
+  {
+    id: 'classic_studio' as const,
+    name: '클래식 스튜디오',
+    desc: '부드러운 스튜디오 조명',
+    preview: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=300&fit=crop',
+  },
+  {
+    id: 'forest_garden' as const,
+    name: '숲속 가든',
+    desc: '초록 자연 속에서',
+    preview: 'https://images.unsplash.com/photo-1510076857177-7470076d4098?w=400&h=300&fit=crop',
+  },
+  {
+    id: 'city_night' as const,
+    name: '도심 야경',
+    desc: '시네마틱 도시 야경',
+    preview: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=400&h=300&fit=crop',
+  },
 ];
+
+/* ─── SVG Pictograms ─── */
+const IconCamera = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+    <circle cx="12" cy="13" r="4" />
+  </svg>
+);
+
+const IconImage = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2" />
+    <circle cx="8.5" cy="8.5" r="1.5" />
+    <path d="M21 15l-5-5L5 21" />
+  </svg>
+);
 
 function SnapshotsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const sessionId = searchParams.get('session');
 
-  const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
+  const [selectedThemes, setSelectedThemes] = useState<string[]>([]);
   const [generating, setGenerating] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
 
   if (!sessionId) {
     return (
@@ -35,32 +78,57 @@ function SnapshotsContent() {
     );
   }
 
+  const toggleTheme = (themeId: string) => {
+    setSelectedThemes((prev) => {
+      if (prev.includes(themeId)) return prev.filter((t) => t !== themeId);
+      if (prev.length >= 10) return prev; // max 10
+      return [...prev, themeId];
+    });
+  };
+
   const handleGenerate = async () => {
-    if (!selectedTheme) return;
+    if (selectedThemes.length === 0) return;
     setGenerating(true);
     setError(null);
+    setProgress(0);
 
-    try {
-      const res = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId,
-          step: 'snapshot',
-          options: { theme: selectedTheme },
-        }),
-      });
+    const newImages: string[] = [];
+    const total = selectedThemes.length;
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'AI 이미지 생성 실패');
+    for (let i = 0; i < total; i++) {
+      setProgress(Math.round(((i) / total) * 100));
+      try {
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId,
+            step: 'snapshot',
+            options: { theme: selectedThemes[i] },
+          }),
+        });
 
-      setImages((prev) => [...prev, ...data.images]);
-    } catch (err) {
-      console.error('Generate error:', err);
-      setError(err instanceof Error ? err.message : '이미지 생성 중 오류가 발생했습니다.');
-    } finally {
-      setGenerating(false);
+        const data = await res.json();
+        if (!res.ok) {
+          console.error(`Theme ${selectedThemes[i]} error:`, data);
+          continue; // skip failed, continue with others
+        }
+
+        if (data.images) {
+          newImages.push(...data.images);
+          setImages((prev) => [...prev, ...data.images]);
+        }
+      } catch (err) {
+        console.error(`Generate error for theme ${selectedThemes[i]}:`, err);
+      }
     }
+
+    setProgress(100);
+
+    if (newImages.length === 0) {
+      setError('이미지 생성에 실패했습니다. 다시 시도해주세요.');
+    }
+    setGenerating(false);
   };
 
   return (
@@ -68,28 +136,41 @@ function SnapshotsContent() {
       <StepIndicator currentStep={2} />
 
       <div className={styles.headerSection}>
-        <p className="text-label">Step 2 — Virtual Snapshots</p>
         <h1>가상 스냅사진 생성</h1>
         <p className={styles.subtitle}>
-          원하는 테마를 선택하면, AI가 두 분의 프리웨딩 스냅사진을 만들어 드려요.
+          원하는 테마를 선택하면, AI가 두 분의 스냅사진을 만들어 드려요
         </p>
       </div>
 
-      {/* Theme Selection */}
+      {/* Theme Selection with Preview Images */}
       <section className={styles.themeSection}>
-        <h3 className={styles.sectionTitle}>📷 테마 선택</h3>
+        <h3 className={styles.sectionTitle}>
+          <IconCamera /> 테마 선택 <span className={styles.countBadge}>{selectedThemes.length}/10</span>
+        </h3>
         <div className={styles.themeGrid}>
-          {THEMES.map((theme) => (
-            <button
-              key={theme.id}
-              className={`card ${styles.themeCard} ${selectedTheme === theme.id ? styles.themeSelected : ''}`}
-              onClick={() => setSelectedTheme(theme.id)}
-            >
-              <span className={styles.themeEmoji}>{theme.emoji}</span>
-              <span className={styles.themeName}>{theme.name}</span>
-              <span className={styles.themeDesc}>{theme.desc}</span>
-            </button>
-          ))}
+          {THEMES.map((theme) => {
+            const isSelected = selectedThemes.includes(theme.id);
+            return (
+              <button
+                key={theme.id}
+                className={`${styles.themeCard} ${isSelected ? styles.themeSelected : ''}`}
+                onClick={() => toggleTheme(theme.id)}
+              >
+                <div className={styles.themePreview}>
+                  <img src={theme.preview} alt={theme.name} className={styles.themePreviewImg} />
+                  {isSelected && (
+                    <div className={styles.selectedBadge}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                <span className={styles.themeName}>{theme.name}</span>
+                <span className={styles.themeDesc}>{theme.desc}</span>
+              </button>
+            );
+          })}
         </div>
       </section>
 
@@ -98,24 +179,32 @@ function SnapshotsContent() {
         <button
           className="btn btn-primary btn-large"
           onClick={handleGenerate}
-          disabled={!selectedTheme || generating}
+          disabled={selectedThemes.length === 0 || generating}
+          style={{ width: '100%', maxWidth: 360 }}
         >
           {generating ? (
             <>
-              <span className="loader-ring" style={{ width: 20, height: 20, borderWidth: 2 }} />
-              AI가 이미지를 생성하고 있어요...
+              <span className="loader-ring" style={{ width: 18, height: 18, borderWidth: 2 }} />
+              생성 중... {progress}%
             </>
           ) : (
-            '✨ 스냅사진 생성하기'
+            `스냅사진 생성하기 (${selectedThemes.length}장)`
           )}
         </button>
-        {error && <p className={styles.errorMsg}>⚠️ {error}</p>}
+        {generating && (
+          <div className={styles.progressBar}>
+            <div className={styles.progressFill} style={{ width: `${progress}%` }} />
+          </div>
+        )}
+        {error && <p className={styles.errorMsg}>{error}</p>}
       </div>
 
       {/* Generated Images */}
       {images.length > 0 && (
         <section className={styles.gallerySection}>
-          <h3 className={styles.sectionTitle}>🖼️ 생성된 스냅사진</h3>
+          <h3 className={styles.sectionTitle}>
+            <IconImage /> 생성된 스냅사진 <span className={styles.countBadge}>{images.length}장</span>
+          </h3>
           <div className={styles.gallery}>
             {images.map((url, i) => (
               <div key={i} className={styles.imageCard}>
@@ -129,13 +218,14 @@ function SnapshotsContent() {
             <button
               className="btn btn-primary btn-large"
               onClick={() => router.push(`/styling?session=${sessionId}`)}
+              style={{ width: '100%', maxWidth: 360 }}
             >
-              다음: 드레스 & 메이크업 →
+              다음: 드레스 & 메이크업
             </button>
             <button
               className="btn btn-secondary"
               onClick={() => {
-                setSelectedTheme(null);
+                setSelectedThemes([]);
                 setImages([]);
               }}
             >

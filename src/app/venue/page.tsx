@@ -7,12 +7,12 @@ import StepIndicator from '@/components/layout/StepIndicator';
 import styles from './page.module.css';
 
 const VENUE_STYLES = [
-  { id: 'garden', emoji: '🌿', name: '가든 웨딩', desc: '야외 정원, 자연광, 꽃 아치', style: 'Outdoor garden wedding with floral arch, natural sunlight, lush greenery, white chairs, warm afternoon light' },
-  { id: 'chapel', emoji: '⛪', name: '채플 웨딩', desc: '스테인드글라스, 고전 분위기', style: 'Classic chapel wedding with stained glass windows, white marble interior, elegant chandeliers, wooden pews' },
-  { id: 'hotel_ballroom', emoji: '🏨', name: '호텔 볼룸', desc: '화려한 샹들리에, 클래식 연회장', style: 'Luxury hotel ballroom wedding with crystal chandeliers, gold accents, white draping, elegant table settings' },
-  { id: 'beach', emoji: '🏖️', name: '비치 웨딩', desc: '해변 석양, 로맨틱 트로피컬', style: 'Beach wedding at sunset with white fabric canopy, ocean waves, tropical flowers, barefoot on sand' },
-  { id: 'hanok', emoji: '🏯', name: '한옥 웨딩', desc: '전통 한옥, 한국 전통혼례', style: 'Traditional Korean Hanok wedding venue with wooden architecture, paper lanterns, traditional decorations, courtyard ceremony' },
-  { id: 'rooftop', emoji: '🌃', name: '루프탑 웨딩', desc: '도심 야경, 시티뷰 루프탑', style: 'Rooftop wedding with city skyline view at twilight, string lights, modern minimalist decoration, urban chic atmosphere' },
+  { id: 'garden', name: '가든 웨딩', desc: '야외 정원, 자연광, 꽃 아치', preview: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400&h=300&fit=crop', style: 'Outdoor garden wedding with floral arch, natural sunlight, lush greenery, white chairs, warm afternoon light' },
+  { id: 'chapel', name: '채플 웨딩', desc: '스테인드글라스, 고전 분위기', preview: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=300&fit=crop', style: 'Classic chapel wedding with stained glass windows, white marble interior, elegant chandeliers, wooden pews' },
+  { id: 'hotel_ballroom', name: '호텔 볼룸', desc: '화려한 샹들리에, 클래식 연회장', preview: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400&h=300&fit=crop', style: 'Luxury hotel ballroom wedding with crystal chandeliers, gold accents, white draping, elegant table settings' },
+  { id: 'beach', name: '비치 웨딩', desc: '해변 석양, 로맨틱 트로피컬', preview: 'https://images.unsplash.com/photo-1545232979-8bf68ee9b1af?w=400&h=300&fit=crop', style: 'Beach wedding at sunset with white fabric canopy, ocean waves, tropical flowers, barefoot on sand' },
+  { id: 'hanok', name: '한옥 웨딩', desc: '전통 한옥, 한국 전통혼례', preview: 'https://images.unsplash.com/photo-1577717903315-1691ae25ab3f?w=400&h=300&fit=crop', style: 'Traditional Korean Hanok wedding venue with wooden architecture, paper lanterns, traditional decorations, courtyard ceremony' },
+  { id: 'rooftop', name: '루프탑 웨딩', desc: '도심 야경, 시티뷰 루프탑', preview: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400&h=260&fit=crop&crop=top', style: 'Rooftop wedding with city skyline view at twilight, string lights, modern minimalist decoration, urban chic atmosphere' },
 ];
 
 interface VenueItem {
@@ -118,7 +118,6 @@ function VenueContent() {
       <StepIndicator currentStep={4} />
 
       <div className={styles.headerSection}>
-        <p className="text-label">Step 4 — Virtual Venue</p>
         <h1>결혼식장 미리보기</h1>
         <p className={styles.subtitle}>
           꿈꾸던 결혼식장 스타일을 선택하거나, 실제 예식장을 검색해보세요.
@@ -146,17 +145,27 @@ function VenueContent() {
           {/* Style Grid */}
           <section className={styles.venueSection}>
             <div className={styles.venueGrid}>
-              {VENUE_STYLES.map((v) => (
-                <button
-                  key={v.id}
-                  className={`card ${styles.venueCard} ${selectedStyle === v.id ? styles.venueSelected : ''}`}
-                  onClick={() => setSelectedStyle(v.id)}
-                >
-                  <span className={styles.venueEmoji}>{v.emoji}</span>
-                  <span className={styles.venueName}>{v.name}</span>
-                  <span className={styles.venueDesc}>{v.desc}</span>
-                </button>
-              ))}
+              {VENUE_STYLES.map((v) => {
+                const isSelected = selectedStyle === v.id;
+                return (
+                  <button
+                    key={v.id}
+                    className={`${styles.venueCard} ${isSelected ? styles.venueSelected : ''}`}
+                    onClick={() => setSelectedStyle(v.id)}
+                  >
+                    <div className={styles.venuePreview}>
+                      <img src={v.preview} alt={v.name} className={styles.venuePreviewImg} />
+                      {isSelected && (
+                        <div className={styles.venueSelectedBadge}>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+                        </div>
+                      )}
+                    </div>
+                    <span className={styles.venueName}>{v.name}</span>
+                    <span className={styles.venueDesc}>{v.desc}</span>
+                  </button>
+                );
+              })}
             </div>
           </section>
 

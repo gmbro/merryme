@@ -22,12 +22,111 @@ interface GalleryData {
   totalCount: number;
 }
 
-const STEP_INFO: Record<string, { label: string; emoji: string; title: string }> = {
-  snapshot: { label: 'Step 2', emoji: '📷', title: '가상 스냅사진' },
-  styling: { label: 'Step 3', emoji: '👗', title: '드레스 & 메이크업' },
-  venue: { label: 'Step 4', emoji: '💒', title: '결혼식장' },
-  honeymoon: { label: 'Step 5', emoji: '✈️', title: '신혼여행' },
+const STEP_INFO: Record<string, { title: string }> = {
+  snapshot: { title: '가상 스냅사진' },
+  styling: { title: '드레스 & 메이크업' },
+  venue: { title: '결혼식장' },
+  honeymoon: { title: '신혼여행' },
 };
+
+/* ─── Cinematic Slideshow ─── */
+function CinematicSlideshow({
+  allImages,
+  onClose,
+}: {
+  allImages: { url: string; step: string; index: number }[];
+  onClose: () => void;
+}) {
+  const [current, setCurrent] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
+  useEffect(() => {
+    if (isPaused) return;
+    const timer = setInterval(() => {
+      setCurrent((prev) => {
+        if (prev >= allImages.length - 1) {
+          setIsPaused(true);
+          return prev;
+        }
+        return prev + 1;
+      });
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [isPaused, allImages.length]);
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'ArrowRight') setCurrent((p) => Math.min(p + 1, allImages.length - 1));
+      if (e.key === 'ArrowLeft') setCurrent((p) => Math.max(p - 1, 0));
+      if (e.key === ' ') { e.preventDefault(); setIsPaused((p) => !p); }
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [onClose, allImages.length]);
+
+  const img = allImages[current];
+  if (!img) return null;
+  const stepInfo = STEP_INFO[img.step];
+  const progress = ((current + 1) / allImages.length) * 100;
+
+  return (
+    <div className={styles.slideshowOverlay}>
+      {/* Background image with Ken Burns */}
+      <div className={styles.slideshowBg} key={current}>
+        <img src={img.url} alt="" className={styles.slideshowBgImg} />
+      </div>
+
+      {/* Content */}
+      <div className={styles.slideshowContent}>
+        <div className={styles.slideshowTop}>
+          <span className={styles.slideshowStep}>{stepInfo?.title}</span>
+          <button className={styles.slideshowClose} onClick={onClose}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <div className={styles.slideshowCenter} onClick={() => setIsPaused(!isPaused)}>
+          {isPaused && current >= allImages.length - 1 && (
+            <div className={styles.slideshowEnd}>
+              <p>우리의 아름다운 여정</p>
+              <button className="btn btn-glass" onClick={(e) => { e.stopPropagation(); setCurrent(0); setIsPaused(false); }}>
+                처음부터 다시 보기
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className={styles.slideshowBottom}>
+          <div className={styles.slideshowProgress}>
+            <div className={styles.slideshowProgressFill} style={{ width: `${progress}%` }} />
+          </div>
+          <div className={styles.slideshowControls}>
+            <button onClick={() => setCurrent((p) => Math.max(p - 1, 0))} className={styles.slideshowBtn}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            </button>
+            <button onClick={() => setIsPaused(!isPaused)} className={styles.slideshowBtn}>
+              {isPaused ? (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+              )}
+            </button>
+            <button onClick={() => setCurrent((p) => Math.min(p + 1, allImages.length - 1))} className={styles.slideshowBtn}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+            </button>
+            <span className={styles.slideshowCounter}>{current + 1} / {allImages.length}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function ImageModal({
   src,
@@ -87,6 +186,7 @@ export default function GalleryPage({
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showSlideshow, setShowSlideshow] = useState(false);
   const { user, signInWithGoogle } = useAuth();
 
   useEffect(() => {
@@ -196,6 +296,16 @@ export default function GalleryPage({
         <ImageModal src={modalImage.src} alt={modalImage.alt} onClose={() => setModalImage(null)} />
       )}
 
+      {/* Cinematic Slideshow */}
+      {showSlideshow && hasImages && data && (() => {
+        const allSlideImages: { url: string; step: string; index: number }[] = [];
+        (['snapshot', 'styling', 'venue', 'honeymoon'] as const).forEach((step) => {
+          const imgs = data.images[step];
+          if (imgs) imgs.forEach((img, i) => allSlideImages.push({ url: img.url, step, index: i }));
+        });
+        return <CinematicSlideshow allImages={allSlideImages} onClose={() => setShowSlideshow(false)} />;
+      })()}
+
       <main className={styles.main}>
         {/* Login Modal */}
         {showLoginModal && (
@@ -260,6 +370,14 @@ export default function GalleryPage({
               <h2 className={styles.albumTitle}>💐 웨딩 앨범</h2>
             </div>
             <div className={styles.actionRight}>
+              {hasImages && (
+                <button
+                  className="btn btn-secondary btn-small"
+                  onClick={() => setShowSlideshow(true)}
+                >
+                  슬라이드쇼
+                </button>
+              )}
               <button
                 className="btn btn-secondary btn-small"
                 onClick={handleShare}
@@ -335,9 +453,7 @@ export default function GalleryPage({
             return (
               <section key={step} className={styles.stepSection}>
                 <div className={styles.stepHeader}>
-                  <span className={styles.stepEmoji}>{info.emoji}</span>
                   <div>
-                    <p className={styles.stepLabel}>{info.label}</p>
                     <h3 className={styles.stepTitle}>{info.title}</h3>
                   </div>
                   <span className={styles.stepCount}>{imgs.length}장</span>
@@ -353,7 +469,7 @@ export default function GalleryPage({
                       <img src={img.url} alt={`${info.title} ${i + 1}`} loading="lazy" />
                       <div className={styles.imageOverlay}>
                         <span className={styles.imageIndex}>#{i + 1}</span>
-                        <span className={styles.imageZoom}>🔍 확대</span>
+                        <span className={styles.imageZoom}>확대</span>
                       </div>
                     </div>
                   ))}
