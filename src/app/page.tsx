@@ -62,10 +62,10 @@ const IconGallery = () => (
 );
 
 const JOURNEY_STEPS = [
-  { icon: <IconCamera />, title: '스냅사진', desc: '테마별 웨딩 스냅' },
-  { icon: <IconChurch />, title: '예식장', desc: '결혼식장 시뮬레이션' },
-  { icon: <IconPlane />, title: '신혼여행', desc: '꿈의 여행지' },
-  { icon: <IconGallery />, title: '갤러리', desc: '영상으로 감상하기' },
+  { icon: <IconCamera />, title: '스냅사진', desc: '' },
+  { icon: <IconChurch />, title: '예식장', desc: '' },
+  { icon: <IconPlane />, title: '신혼여행', desc: '' },
+  { icon: <IconGallery />, title: '갤러리', desc: '' },
 ];
 
 /* ─── 서버 얼굴 검증 (Gemini API) ─── */
@@ -341,7 +341,6 @@ export default function LandingPage() {
                 <div className={styles.journeyStepIcon}>{step.icon}</div>
                 <div className={styles.journeyStepInfo}>
                   <span className={styles.journeyStepTitle}>{step.title}</span>
-                  <span className={styles.journeyStepDesc}>{step.desc}</span>
                 </div>
                 {i < JOURNEY_STEPS.length - 1 && <div className={styles.journeyStepLine} />}
               </div>
@@ -437,6 +436,7 @@ export default function LandingPage() {
             className={`btn btn-primary btn-large ${styles.startBtn}`}
             onClick={handleStart}
             disabled={!canStart || isStarting}
+            style={canStart ? { background: 'linear-gradient(135deg, #E91E63, #C2185B)', boxShadow: '0 4px 20px rgba(233,30,99,0.35)' } : {}}
           >
             {isStarting ? (
               <>
