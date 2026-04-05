@@ -65,7 +65,7 @@ const THEMES = [
     id: 'hanok_traditional' as const,
     name: '전통 한옥',
     desc: '고즈넉한 한옥에서',
-    preview: 'https://images.unsplash.com/photo-1578469645742-46cae010e5d6?w=400&h=300&fit=crop',
+    preview: 'https://images.unsplash.com/photo-1548115184-bc6544d06a58?w=400&h=300&fit=crop',
   },
 ];
 
