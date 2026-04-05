@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use, useCallback, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useVideoExport } from '@/hooks/useVideoExport';
 import Footer from '@/components/layout/Footer';
 import styles from './page.module.css';
 
@@ -222,6 +223,7 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
   const [showSlideshow, setShowSlideshow] = useState(false);
   const [zoomImg, setZoomImg] = useState<string | null>(null);
   const { user, signInWithGoogle } = useAuth();
+  const { exportVideo, exporting: videoExporting, progress: videoProgress } = useVideoExport();
 
   useEffect(() => {
     async function fetchGallery() {
@@ -372,11 +374,22 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
               </button>
               <button
                 className="btn btn-secondary btn-large"
+                onClick={() => {
+                  if (!user) { setShowLoginModal(true); return; }
+                  exportVideo(allSlideImages.map(i => i.url), `MerryMe_Wedding_${sessionId.slice(0, 8)}.webm`);
+                }}
+                disabled={videoExporting}
+                style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }}
+              >
+                {videoExporting ? `영상 생성 중... ${videoProgress}%` : '영상 다운로드 (1080p)'}
+              </button>
+              <button
+                className="btn btn-secondary btn-large"
                 onClick={() => user ? handleDownloadZip() : setShowLoginModal(true)}
                 disabled={downloading}
                 style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }}
               >
-                {downloading ? '다운로드 중...' : user ? '다운로드 받기' : '다운로드 받기 (로그인 필요)'}
+                {downloading ? '다운로드 중...' : user ? '사진 다운로드' : '사진 다운로드 (로그인 필요)'}
               </button>
               <a href="/" className="btn btn-ghost" style={{ whiteSpace: 'nowrap' }}>
                 처음으로 돌아가기
