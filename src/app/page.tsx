@@ -2,7 +2,6 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import Header from '@/components/layout/Header';
 import Petals from '@/components/landing/Petals';
 import styles from './page.module.css';
 
@@ -229,12 +228,28 @@ export default function LandingPage() {
 
   return (
     <>
-      <Header />
       <Petals />
       {showGuide && <ImageGuideModal onClose={() => setShowGuide(false)} />}
 
       <section className={styles.hero}>
         <div className={styles.heroInner}>
+          {/* 꽃다발 로고 + 브랜드 */}
+          <div className={styles.brandMark}>
+            <svg className={styles.bouquetIcon} width="36" height="36" viewBox="0 0 48 48" fill="none" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="24" cy="14" r="5" fill="var(--color-accent)" opacity="0.7" />
+              <circle cx="17" cy="18" r="4.5" fill="var(--color-primary-light)" opacity="0.6" />
+              <circle cx="31" cy="18" r="4.5" fill="var(--color-primary-light)" opacity="0.6" />
+              <circle cx="20" cy="11" r="4" fill="var(--color-primary)" opacity="0.5" />
+              <circle cx="28" cy="11" r="4" fill="var(--color-primary)" opacity="0.5" />
+              <path d="M22 22 L24 40 L26 22" stroke="var(--color-success)" strokeWidth="2" fill="none" />
+              <path d="M20 24 L24 38" stroke="var(--color-success)" strokeWidth="1.5" fill="none" opacity="0.6" />
+              <path d="M28 24 L24 38" stroke="var(--color-success)" strokeWidth="1.5" fill="none" opacity="0.6" />
+              <path d="M18 26c-2 2-3 0-2-2" stroke="var(--color-success)" strokeWidth="1.2" fill="none" />
+              <path d="M30 26c2 2 3 0 2-2" stroke="var(--color-success)" strokeWidth="1.2" fill="none" />
+            </svg>
+            <span className={styles.brandText}>메리미</span>
+          </div>
+
           {/* 타이틀 */}
           <h1 className={styles.heroTitle}>
             사진 두 장으로 만드는

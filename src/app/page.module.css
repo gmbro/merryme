@@ -1,14 +1,13 @@
 /* ===========================
-   Landing Page — Mobile-First v3
+   Landing Page — Mobile-First v4
    =========================== */
 
-/* Hero — single page */
+/* Hero — single page, no header */
 .hero {
   min-height: 100dvh;
   background: var(--gradient-hero);
   display: flex;
   flex-direction: column;
-  padding-top: 72px;
   position: relative;
   overflow: hidden;
 }
@@ -20,18 +19,38 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: var(--space-lg) var(--space-md) var(--space-xl);
+  padding: var(--space-md) var(--space-md) var(--space-lg);
   position: relative;
   z-index: 1;
   max-width: 480px;
   margin: 0 auto;
-  gap: var(--space-md);
+  gap: var(--space-sm);
+}
+
+/* Brand Mark */
+.brandMark {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bouquetIcon {
+  filter: drop-shadow(0 2px 6px rgba(180, 100, 60, 0.2));
+}
+
+.brandText {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: -0.02em;
 }
 
 .heroTitle {
-  line-height: 1.45;
-  font-size: clamp(1.5rem, 6.5vw, 2.4rem);
+  line-height: 1.4;
+  font-size: clamp(1.4rem, 6vw, 2.2rem);
   word-break: keep-all;
+  margin-top: -4px;
 }
 
 .heroHighlight {
@@ -41,9 +60,9 @@
 }
 
 .heroDesc {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   color: var(--color-text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
   word-break: keep-all;
 }
 
