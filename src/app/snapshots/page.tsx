@@ -2,7 +2,6 @@
 
 import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import Header from '@/components/layout/Header';
 import StepIndicator from '@/components/layout/StepIndicator';
 import styles from './page.module.css';
 
@@ -38,7 +37,39 @@ const THEMES = [
     desc: '시네마틱 도시 야경',
     preview: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=400&h=300&fit=crop',
   },
+  {
+    id: 'autumn_park' as const,
+    name: '가을 단풍',
+    desc: '붉은 단풍 공원에서',
+    preview: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop',
+  },
+  {
+    id: 'snowy_winter' as const,
+    name: '겨울 눈꽃',
+    desc: '로맨틱한 눈 속에서',
+    preview: 'https://images.unsplash.com/photo-1491002052546-bf38f186af56?w=400&h=300&fit=crop',
+  },
+  {
+    id: 'lavender_field' as const,
+    name: '라벤더 밭',
+    desc: '보라빛 꽃밭에서',
+    preview: 'https://images.unsplash.com/photo-1499002238440-d264edd596ec?w=400&h=300&fit=crop',
+  },
+  {
+    id: 'rooftop_garden' as const,
+    name: '루프탑 가든',
+    desc: '도심 속 루프탑에서',
+    preview: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop',
+  },
+  {
+    id: 'hanok_traditional' as const,
+    name: '전통 한옥',
+    desc: '고즈넉한 한옥에서',
+    preview: 'https://images.unsplash.com/photo-1583169803882-c42da85f4b3e?w=400&h=300&fit=crop',
+  },
 ];
+
+const MAX_SELECT = 2;
 
 /* ─── SVG Pictograms ─── */
 const IconCamera = () => (
@@ -81,7 +112,7 @@ function SnapshotsContent() {
   const toggleTheme = (themeId: string) => {
     setSelectedThemes((prev) => {
       if (prev.includes(themeId)) return prev.filter((t) => t !== themeId);
-      if (prev.length >= 10) return prev; // max 10
+      if (prev.length >= MAX_SELECT) return prev;
       return [...prev, themeId];
     });
   };
@@ -157,7 +188,7 @@ function SnapshotsContent() {
       {/* Theme Selection with Preview Images */}
       <section className={styles.themeSection}>
         <h3 className={styles.sectionTitle}>
-          <IconCamera /> 테마 선택 <span className={styles.countBadge}>{selectedThemes.length}/10</span>
+          <IconCamera /> 테마 선택 <span className={styles.countBadge}>{selectedThemes.length}/{MAX_SELECT}</span>
         </h3>
         <div className={styles.themeGrid}>
           {THEMES.map((theme) => {
@@ -252,15 +283,12 @@ function SnapshotsContent() {
 
 export default function SnapshotsPage() {
   return (
-    <>
-      <Header />
-      <main className={styles.main}>
-        <div className="container">
-          <Suspense fallback={<div className={styles.loading}><span className="loader-ring" /></div>}>
-            <SnapshotsContent />
-          </Suspense>
-        </div>
-      </main>
-    </>
+    <main className={styles.main}>
+      <div className="container">
+        <Suspense fallback={<div className={styles.loading}><span className="loader-ring" /></div>}>
+          <SnapshotsContent />
+        </Suspense>
+      </div>
+    </main>
   );
 }

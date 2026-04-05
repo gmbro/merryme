@@ -15,7 +15,12 @@ export type SnapshotTheme =
   | 'beach_sunset'
   | 'classic_studio'
   | 'forest_garden'
-  | 'city_night';
+  | 'city_night'
+  | 'autumn_park'
+  | 'snowy_winter'
+  | 'lavender_field'
+  | 'rooftop_garden'
+  | 'hanok_traditional';
 
 const SNAPSHOT_THEMES: Record<SnapshotTheme, string> = {
   cherry_blossom: '만개한 벚꽃 나무 아래에서, 꽃잎이 흩날리는 봄날의 오후, 자연광',
@@ -23,6 +28,11 @@ const SNAPSHOT_THEMES: Record<SnapshotTheme, string> = {
   classic_studio: '클래식한 사진 스튜디오, 부드러운 스튜디오 조명, 크림색 배경',
   forest_garden: '울창한 숲 속 정원, 초록 덩굴과 야생화, 자연 채광이 나뭇잎 사이로 스며드는 모습',
   city_night: '도심 야경을 배경으로, 네온사인 반사, 시네마틱 느낌의 따뜻한 도시 야경',
+  autumn_park: '단풍이 물든 가을 공원, 붉고 노란 낙엽이 흩날리는 따뜻한 오후 빛',
+  snowy_winter: '하얀 눈이 내리는 겨울 풍경, 따뜻한 코트를 입고, 로맨틱한 눈 속 분위기',
+  lavender_field: '보라색 라벤더 밭, 프로방스풍 따뜻한 햇살과 향기로운 꽃밭',
+  rooftop_garden: '도심 루프탑 정원, 도시 스카이라인을 배경으로 한 로맨틱 가든 파티',
+  hanok_traditional: '전통 한옥 마당, 한복을 입고, 고즈넉한 한국 전통 분위기',
 };
 
 export function buildSnapshotPrompt(theme: SnapshotTheme): string {
