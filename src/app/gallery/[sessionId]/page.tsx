@@ -237,15 +237,11 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
     }
   }, [sessionId]);
 
-  // Verify payment server-side
+  // Check payment in localStorage
   useEffect(() => {
-    if (user && !isPaid) {
-      fetch(`/api/payment-status?sessionId=${sessionId}`)
-        .then(r => r.json())
-        .then(d => { if (d.paid) setIsPaid(true); })
-        .catch(() => {});
-    }
-  }, [user, sessionId, isPaid]);
+    const paid = localStorage.getItem(`merryme_paid_${sessionId}`);
+    if (paid === 'true') setIsPaid(true);
+  }, [sessionId]);
 
   useEffect(() => {
     async function fetchGallery() {
@@ -293,17 +289,53 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
   const handleCheckout = useCallback(async () => {
     setCheckingPayment(true);
     try {
-      const res = await fetch('/api/checkout', {
+      const PortOne = await import('@portone/browser-sdk/v2');
+      const paymentId = `merryme_${sessionId.slice(0, 8)}_${Date.now()}`;
+      const AMOUNT = 1500; // 1,500원
+
+      const response = await PortOne.requestPayment({
+        storeId: process.env.NEXT_PUBLIC_PORTONE_STORE_ID || '',
+        channelKey: process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY || '',
+        paymentId,
+        orderName: 'MerryMe 웨딩 영상 다운로드',
+        totalAmount: AMOUNT,
+        currency: 'CURRENCY_KRW',
+        payMethod: 'CARD',
+      });
+
+      if (response?.code !== undefined) {
+        // 결제 실패/취소
+        if (response.code === 'USER_CANCEL') {
+          // 사용자가 취소 — 조용히 처리
+        } else {
+          alert(response?.message || '결제에 실패했습니다.');
+        }
+        return;
+      }
+
+      // 서버에서 결제 검증
+      const verifyRes = await fetch('/api/payment-verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, userEmail: user?.email }),
+        body: JSON.stringify({ paymentId, sessionId, expectedAmount: AMOUNT }),
       });
-      const d = await res.json();
-      if (d.url) window.location.href = d.url;
-      else alert('결제 페이지를 열 수 없습니다.');
-    } catch { alert('결제 오류가 발생했습니다.'); }
-    finally { setCheckingPayment(false); }
-  }, [sessionId, user]);
+      const verifyData = await verifyRes.json();
+
+      if (verifyData.verified) {
+        setIsPaid(true);
+        localStorage.setItem(`merryme_paid_${sessionId}`, 'true');
+        setShowPaymentModal(false);
+        alert('결제가 완료되었습니다! 영상을 다운로드할 수 있어요.');
+      } else {
+        alert('결제 검증에 실패했습니다. 고객센터에 문의해주세요.');
+      }
+    } catch (err) {
+      console.error('Payment error:', err);
+      alert('결제 중 오류가 발생했습니다.');
+    } finally {
+      setCheckingPayment(false);
+    }
+  }, [sessionId]);
 
   if (loading) {
     return (
@@ -386,7 +418,7 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
               1080p 고화질 웨딩 영상을<br />다운로드 받으세요
             </p>
             <div className={styles.priceBox}>
-              <span className={styles.priceAmount}>$1</span>
+              <span className={styles.priceAmount}>₩1,500</span>
               <span className={styles.priceLabel}>1회 결제</span>
             </div>
             <ul className={styles.priceFeatures}>
@@ -400,7 +432,7 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
               disabled={checkingPayment}
               style={{ width: '100%', whiteSpace: 'nowrap' }}
             >
-              {checkingPayment ? '결제 페이지 준비 중...' : '$1 결제하고 다운로드'}
+              {checkingPayment ? '결제 준비 중...' : '1,500원 결제하고 다운로드'}
             </button>
             <button className={styles.paymentCancel} onClick={() => setShowPaymentModal(false)}>
               다음에 할게요
@@ -458,7 +490,7 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
                   ? `영상 생성 중... ${videoProgress}%`
                   : isPaid
                     ? '영상 다운로드 (1080p)'
-                    : '영상 다운로드 ($1)'}
+                    : '영상 다운로드 (₩1,500)'}
               </button>
               <a href="/" className="btn btn-ghost" style={{ whiteSpace: 'nowrap' }}>
                 처음으로 돌아가기
