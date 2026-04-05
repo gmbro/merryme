@@ -3,6 +3,7 @@
 import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import StepIndicator from '@/components/layout/StepIndicator';
+import Footer from '@/components/layout/Footer';
 import styles from './page.module.css';
 
 const THEMES = [
@@ -196,6 +197,7 @@ export default function SnapshotsPage() {
           <SnapshotsContent />
         </Suspense>
       </div>
+      <Footer />
     </main>
   );
 }

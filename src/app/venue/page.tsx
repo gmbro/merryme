@@ -3,6 +3,7 @@
 import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import StepIndicator from '@/components/layout/StepIndicator';
+import Footer from '@/components/layout/Footer';
 import styles from './page.module.css';
 
 const VENUE_STYLES = [
@@ -156,14 +157,13 @@ function VenueContent() {
 
 export default function VenuePage() {
   return (
-    <>
-      <main className={styles.main}>
-        <div className="container">
-          <Suspense fallback={<div className={styles.loading}><span className="loader-ring" /></div>}>
-            <VenueContent />
-          </Suspense>
-        </div>
-      </main>
-    </>
+    <main className={styles.main}>
+      <div className="container">
+        <Suspense fallback={<div className={styles.loading}><span className="loader-ring" /></div>}>
+          <VenueContent />
+        </Suspense>
+      </div>
+      <Footer />
+    </main>
   );
 }

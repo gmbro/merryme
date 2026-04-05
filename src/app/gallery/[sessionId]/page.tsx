@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use, useCallback, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import Footer from '@/components/layout/Footer';
 import styles from './page.module.css';
 
 interface GalleryImage {
@@ -21,13 +22,13 @@ interface GalleryData {
   totalCount: number;
 }
 
-const STEP_INFO: Record<string, { title: string; emoji: string }> = {
-  snapshot: { title: '스냅사진', emoji: '📸' },
-  venue: { title: '결혼식장', emoji: '💒' },
-  honeymoon: { title: '신혼여행', emoji: '✈️' },
+const STEP_TITLES: Record<string, string> = {
+  snapshot: '스냅사진',
+  venue: '결혼식장',
+  honeymoon: '신혼여행',
 };
 
-/* ─── Acoustic Guitar Ambient Music (봄바람 style) ─── */
+/* ─── Acoustic Guitar Music ─── */
 function useAcousticMusic() {
   const ctxRef = useRef<AudioContext | null>(null);
   const gainRef = useRef<GainNode | null>(null);
@@ -44,13 +45,11 @@ function useAcousticMusic() {
       masterGain.connect(ctx.destination);
       gainRef.current = masterGain;
 
-      // Acoustic guitar-like arpeggiated chords
-      // C - Am - F - G progression (봄바람 feel)
       const chords = [
-        [261.63, 329.63, 392.0],  // C major
-        [220.0, 261.63, 329.63],  // A minor
-        [174.61, 220.0, 261.63],  // F major
-        [196.0, 246.94, 293.66],  // G major
+        [261.63, 329.63, 392.0],
+        [220.0, 261.63, 329.63],
+        [174.61, 220.0, 261.63],
+        [196.0, 246.94, 293.66],
       ];
 
       let chordIdx = 0;
@@ -58,60 +57,39 @@ function useAcousticMusic() {
         if (!ctxRef.current || ctxRef.current.state === 'closed') return;
         const chord = chords[chordIdx % chords.length];
         chordIdx++;
-
         chord.forEach((freq, noteIdx) => {
           const osc = ctxRef.current!.createOscillator();
-          // Mix of triangle (guitar-like) and sine for warmth
           osc.type = noteIdx === 0 ? 'triangle' : 'sine';
           osc.frequency.value = freq;
-
           const noteGain = ctxRef.current!.createGain();
-          const t = ctxRef.current!.currentTime + noteIdx * 0.15; // arpeggio delay
+          const t = ctxRef.current!.currentTime + noteIdx * 0.15;
           noteGain.gain.setValueAtTime(0, t);
           noteGain.gain.linearRampToValueAtTime(0.04, t + 0.05);
           noteGain.gain.exponentialRampToValueAtTime(0.001, t + 2.5);
-
           osc.connect(noteGain);
           noteGain.connect(masterGain);
           osc.start(t);
           osc.stop(t + 2.5);
         });
-
         setTimeout(playChord, 2800);
       };
 
-      // Gentle background pad
       const pad = ctx.createOscillator();
       pad.type = 'sine';
-      pad.frequency.value = 130.81; // C3 bass pad
+      pad.frequency.value = 130.81;
       const padGain = ctx.createGain();
       padGain.gain.value = 0.015;
       pad.connect(padGain);
       padGain.connect(masterGain);
       pad.start();
 
-      // High shimmer
-      const shimmer = ctx.createOscillator();
-      shimmer.type = 'sine';
-      shimmer.frequency.value = 1046.5; // C6
-      const shimGain = ctx.createGain();
-      shimGain.gain.value = 0.005;
-      shimmer.connect(shimGain);
-      shimGain.connect(masterGain);
-      shimmer.start();
-
       setTimeout(playChord, 500);
       playingRef.current = true;
-    } catch {
-      // Web Audio not supported
-    }
+    } catch { /* no audio */ }
   }, []);
 
   const stop = useCallback(() => {
-    if (ctxRef.current) {
-      ctxRef.current.close();
-      ctxRef.current = null;
-    }
+    if (ctxRef.current) { ctxRef.current.close(); ctxRef.current = null; }
     playingRef.current = false;
   }, []);
 
@@ -126,36 +104,20 @@ function useAcousticMusic() {
   return { start, stop, toggleMute, isMuted };
 }
 
-/* ─── Cinematic Slideshow with Ken Burns + Music ─── */
-function CinematicSlideshow({
-  allImages,
-  onClose,
-}: {
-  allImages: { url: string; step: string; index: number }[];
-  onClose: () => void;
-}) {
+/* ─── Cinematic Slideshow Popup ─── */
+function CinematicSlideshow({ allImages, onClose }: { allImages: { url: string; step: string }[]; onClose: () => void }) {
   const [current, setCurrent] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const { start: startMusic, stop: stopMusic, toggleMute, isMuted } = useAcousticMusic();
   const [kenBurns, setKenBurns] = useState(0);
 
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    startMusic();
-    return () => {
-      document.body.style.overflow = '';
-      stopMusic();
-    };
-  }, [startMusic, stopMusic]);
+  useEffect(() => { document.body.style.overflow = 'hidden'; startMusic(); return () => { document.body.style.overflow = ''; stopMusic(); }; }, [startMusic, stopMusic]);
 
   useEffect(() => {
     if (isPaused) return;
     const timer = setInterval(() => {
       setCurrent((prev) => {
-        if (prev >= allImages.length - 1) {
-          setIsPaused(true);
-          return prev;
-        }
+        if (prev >= allImages.length - 1) { setIsPaused(true); return prev; }
         return prev + 1;
       });
       setKenBurns((p) => p + 1);
@@ -176,31 +138,25 @@ function CinematicSlideshow({
 
   const img = allImages[current];
   if (!img) return null;
-  const stepInfo = STEP_INFO[img.step];
   const progress = ((current + 1) / allImages.length) * 100;
 
-  // Ken Burns: alternate between zoom-in and pan effects
   const kbStyles: React.CSSProperties[] = [
     { transform: 'scale(1.15) translateX(-2%)', transition: 'transform 5s ease-in-out' },
     { transform: 'scale(1.2) translateY(-3%)', transition: 'transform 5s ease-in-out' },
     { transform: 'scale(1.1) translateX(2%)', transition: 'transform 5s ease-in-out' },
     { transform: 'scale(1.18) translateY(2%)', transition: 'transform 5s ease-in-out' },
   ];
-  const kbStyle = kbStyles[kenBurns % kbStyles.length];
 
   return (
     <div className={styles.slideshowOverlay}>
       <div className={styles.slideshowBg} key={current}>
-        <img src={img.url} alt="" className={styles.slideshowBgImg} style={kbStyle} />
+        <img src={img.url} alt="" className={styles.slideshowBgImg} style={kbStyles[kenBurns % kbStyles.length]} />
       </div>
-
       <div className={styles.slideshowContent}>
         <div className={styles.slideshowTop}>
-          <span className={styles.slideshowStep}>
-            {stepInfo?.emoji} {stepInfo?.title}
-          </span>
+          <span className={styles.slideshowStep}>{STEP_TITLES[img.step] || ''}</span>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <button className={styles.slideshowBtn} onClick={toggleMute} title={isMuted ? '음악 켜기' : '음악 끄기'}>
+            <button className={styles.slideshowBtn} onClick={toggleMute}>
               {!isMuted ? (
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
               ) : (
@@ -214,10 +170,9 @@ function CinematicSlideshow({
         </div>
 
         <div className={styles.slideshowCenter} onClick={() => setIsPaused(!isPaused)}>
-          {isPaused && !isPaused && null}
           {isPaused && current >= allImages.length - 1 && (
             <div className={styles.slideshowEnd}>
-              <p>우리의 아름다운 여정 ✨</p>
+              <p>우리의 아름다운 여정</p>
               <button className="btn btn-glass" onClick={(e) => { e.stopPropagation(); setCurrent(0); setIsPaused(false); setKenBurns(0); }}>
                 처음부터 다시 보기
               </button>
@@ -257,11 +212,7 @@ function CinematicSlideshow({
 }
 
 /* ─── Gallery Page ─── */
-export default function GalleryPage({
-  params,
-}: {
-  params: Promise<{ sessionId: string }>;
-}) {
+export default function GalleryPage({ params }: { params: Promise<{ sessionId: string }> }) {
   const { sessionId } = use(params);
   const [data, setData] = useState<GalleryData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -303,7 +254,7 @@ export default function GalleryPage({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch {
-      alert('ZIP 다운로드에 실패했습니다.');
+      alert('다운로드에 실패했습니다.');
     } finally {
       setDownloading(false);
     }
@@ -324,7 +275,6 @@ export default function GalleryPage({
     return (
       <main className={styles.main}>
         <div className={styles.errorContainer}>
-          <span className={styles.errorEmoji}>😢</span>
           <h2>갤러리를 찾을 수 없습니다</h2>
           <p>{error || '해당 세션의 갤러리가 존재하지 않습니다.'}</p>
           <a href="/" className="btn btn-primary">홈으로 돌아가기</a>
@@ -335,10 +285,10 @@ export default function GalleryPage({
 
   const steps = ['snapshot', 'venue', 'honeymoon'] as const;
   const hasImages = data.totalCount > 0;
-  const allSlideImages: { url: string; step: string; index: number }[] = [];
+  const allSlideImages: { url: string; step: string }[] = [];
   steps.forEach((step) => {
     const imgs = data.images[step];
-    if (imgs) imgs.forEach((img, i) => allSlideImages.push({ url: img.url, step, index: i }));
+    if (imgs) imgs.forEach((img) => allSlideImages.push({ url: img.url, step }));
   });
 
   return (
@@ -347,7 +297,6 @@ export default function GalleryPage({
         <CinematicSlideshow allImages={allSlideImages} onClose={() => setShowSlideshow(false)} />
       )}
 
-      {/* Zoom Modal */}
       {zoomImg && (
         <div className={styles.zoomOverlay} onClick={() => setZoomImg(null)}>
           <img src={zoomImg} alt="확대" className={styles.zoomImage} />
@@ -355,15 +304,12 @@ export default function GalleryPage({
         </div>
       )}
 
-      {/* Login Modal */}
       {showLoginModal && (
         <div className={styles.paymentOverlay} onClick={() => setShowLoginModal(false)}>
           <div className={styles.paymentModal} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.loginIcon}>📥</div>
             <h3 className={styles.paymentTitle}>앨범 다운로드</h3>
             <p className={styles.paymentDesc}>
-              고해상도 앨범을 다운로드하려면<br />
-              구글 로그인이 필요해요
+              고화질 앨범을 다운로드하려면<br />구글 로그인이 필요해요
             </p>
             <button
               className="btn btn-primary"
@@ -386,66 +332,31 @@ export default function GalleryPage({
       )}
 
       <main className={styles.main}>
-        {/* Minimal Hero */}
-        <section className={styles.hero}>
-          <div className={styles.heroOverlay} />
-          <div className={styles.heroContent}>
-            <a href="/" className={styles.homeLink}>← 메인으로</a>
-            <h1 className={styles.heroTitle}>
-              <span className="text-display">Wedding Album</span>
-            </h1>
-            <p className={styles.heroStats}>
-              {data.totalCount}장의 추억
-            </p>
-          </div>
-        </section>
-
         <div className="container">
-          {/* Two Action Buttons: Play + Download */}
-          <div className={styles.actionBar}>
-            {allSlideImages.length > 0 && (
-              <button className={styles.playBtn} onClick={() => setShowSlideshow(true)}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                영상 재생
-              </button>
-            )}
-            <button
-              className={styles.downloadBtn}
-              onClick={() => user ? handleDownloadZip() : setShowLoginModal(true)}
-              disabled={!hasImages || downloading}
-            >
-              {downloading ? '다운로드 중...' : user ? '📥 앨범 다운로드' : '🔒 다운로드 (로그인 필요)'}
-            </button>
-          </div>
+          {/* No hero header — jump straight to images */}
 
-          {/* Empty State */}
           {!hasImages && (
             <div className={styles.emptyState}>
-              <span className={styles.emptyEmoji}>🖼️</span>
               <h3>아직 생성된 이미지가 없어요</h3>
-              <p>가상 웨딩 여행을 시작해서 추억을 만들어보세요!</p>
+              <p>웨딩 여정을 시작해서 추억을 만들어보세요</p>
               <a href="/" className="btn btn-primary">시작하기</a>
             </div>
           )}
 
-          {/* Image Sections */}
+          {/* Image Sections — directly, no album header */}
           {steps.map((step) => {
             const imgs = data.images[step];
             if (!imgs || imgs.length === 0) return null;
-            const info = STEP_INFO[step];
             return (
               <section key={step} className={styles.stepSection}>
                 <div className={styles.stepHeader}>
-                  <h3 className={styles.stepTitle}>{info.emoji} {info.title}</h3>
+                  <h3 className={styles.stepTitle}>{STEP_TITLES[step]}</h3>
                   <span className={styles.stepCount}>{imgs.length}장</span>
                 </div>
                 <div className={styles.imageGrid}>
                   {imgs.map((img, i) => (
                     <div key={img.name} className={styles.imageCard} onClick={() => setZoomImg(img.url)}>
-                      <img src={img.url} alt={`${info.title} ${i + 1}`} loading="lazy" />
-                      <div className={styles.imageOverlay}>
-                        <span>🔍</span>
-                      </div>
+                      <img src={img.url} alt={`${STEP_TITLES[step]} ${i + 1}`} loading="lazy" />
                     </div>
                   ))}
                 </div>
@@ -453,18 +364,28 @@ export default function GalleryPage({
             );
           })}
 
+          {/* Bottom Actions */}
           {hasImages && (
-            <div className={styles.bottomCta}>
-              <a href="/" className="btn btn-primary btn-large">🏠 처음으로</a>
+            <div className={styles.bottomActions}>
+              <button className="btn btn-primary btn-large" onClick={() => setShowSlideshow(true)} style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }}>
+                영상으로 보기
+              </button>
+              <button
+                className="btn btn-secondary btn-large"
+                onClick={() => user ? handleDownloadZip() : setShowLoginModal(true)}
+                disabled={downloading}
+                style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }}
+              >
+                {downloading ? '다운로드 중...' : user ? '다운로드 받기' : '다운로드 받기 (로그인 필요)'}
+              </button>
+              <a href="/" className="btn btn-ghost" style={{ whiteSpace: 'nowrap' }}>
+                처음으로 돌아가기
+              </a>
             </div>
           )}
         </div>
 
-        <footer className={styles.footer}>
-          <div className="container">
-            <p>© 2026 MerryMe · AI 기반 가상 웨딩 체험</p>
-          </div>
-        </footer>
+        <Footer />
       </main>
     </>
   );

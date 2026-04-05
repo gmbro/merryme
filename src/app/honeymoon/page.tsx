@@ -3,6 +3,7 @@
 import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import StepIndicator from '@/components/layout/StepIndicator';
+import Footer from '@/components/layout/Footer';
 import styles from './page.module.css';
 
 const POPULAR_DESTINATIONS = [
@@ -162,7 +163,7 @@ function HoneymoonContent() {
           </div>
           <div className={styles.nextSection}>
             <button className="btn btn-primary btn-large" onClick={() => router.push(`/gallery/${sessionId}`)} style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }} disabled={images.length < 4}>
-              갤러리에서 보기
+              갤러리 바로가기
             </button>
             <button className="btn btn-secondary" onClick={() => { setSelectedDest(null); setImages([]); setCustomDest(''); }} disabled={generating} style={{ whiteSpace: 'nowrap' }}>
               다른 여행지로 다시 생성
@@ -182,6 +183,7 @@ export default function HoneymoonPage() {
           <HoneymoonContent />
         </Suspense>
       </div>
+      <Footer />
     </main>
   );
 }
