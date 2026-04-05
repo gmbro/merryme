@@ -57,7 +57,6 @@ function VenueContent() {
           .catch(() => {});
 
       await Promise.all([fetchAngle(0), fetchAngle(1)]);
-      await Promise.all([fetchAngle(2), fetchAngle(3)]);
     } catch (err) {
       setError(err instanceof Error ? err.message : '오류 발생');
     } finally {
@@ -140,7 +139,7 @@ function VenueContent() {
             ))}
           </div>
           <div className={styles.nextSection}>
-            <button className="btn btn-primary btn-large" onClick={() => router.push(`/honeymoon?session=${sessionId}`)} style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }} disabled={images.length < 4}>
+            <button className="btn btn-primary btn-large" onClick={() => router.push(`/honeymoon?session=${sessionId}`)} style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }} disabled={images.length < 2}>
               다음: 신혼여행 시뮬레이션
             </button>
             <button className="btn btn-secondary" onClick={() => { setSelectedStyle(null); setImages([]); }} disabled={generating} style={{ whiteSpace: 'nowrap' }}>

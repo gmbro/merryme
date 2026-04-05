@@ -61,7 +61,6 @@ function HoneymoonContent() {
           .catch(() => {});
 
       await Promise.all([fetchAngle(0), fetchAngle(1)]);
-      await Promise.all([fetchAngle(2), fetchAngle(3)]);
     } catch (err) {
       setError(err instanceof Error ? err.message : '오류 발생');
     } finally {
@@ -162,7 +161,7 @@ function HoneymoonContent() {
             ))}
           </div>
           <div className={styles.nextSection}>
-            <button className="btn btn-primary btn-large" onClick={() => router.push(`/gallery/${sessionId}`)} style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }} disabled={images.length < 4}>
+            <button className="btn btn-primary btn-large" onClick={() => router.push(`/gallery/${sessionId}`)} style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }} disabled={images.length < 2}>
               갤러리 바로가기
             </button>
             <button className="btn btn-secondary" onClick={() => { setSelectedDest(null); setImages([]); setCustomDest(''); }} disabled={generating} style={{ whiteSpace: 'nowrap' }}>
