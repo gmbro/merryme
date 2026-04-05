@@ -13,7 +13,7 @@ export default function Header() {
       <div className={`container ${styles.inner}`}>
         <a href="/" className={styles.logo}>
           <span className={styles.logoIcon}>💍</span>
-          <span className={styles.logoText}>MerryMe</span>
+          <span className={styles.logoText}>메리미</span>
         </a>
 
         <nav className={`${styles.nav} ${menuOpen ? styles.navOpen : ''}`}>

@@ -85,6 +85,8 @@ export default function GalleryPage({
   const [downloading, setDownloading] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
+  const [paid, setPaid] = useState(false);
 
   useEffect(() => {
     async function fetchGallery() {
@@ -194,11 +196,45 @@ export default function GalleryPage({
       )}
 
       <main className={styles.main}>
+        {/* Payment Modal */}
+        {showPayment && (
+          <div className={styles.paymentOverlay} onClick={() => setShowPayment(false)}>
+            <div className={styles.paymentModal} onClick={(e) => e.stopPropagation()}>
+              <span className={styles.paymentEmoji}>☕</span>
+              <h3 className={styles.paymentTitle}>앨범 다운로드</h3>
+              <p className={styles.paymentDesc}>
+                완성된 앨범을 다운로드하려면<br />
+                <strong>100원</strong>이 필요해요
+              </p>
+              <div className={styles.paymentPrice}>
+                <span>₩</span>100
+              </div>
+              <button
+                className="btn btn-primary"
+                onClick={async () => {
+                  setPaid(true);
+                  setShowPayment(false);
+                  await handleDownloadZip();
+                }}
+                style={{ width: '100%' }}
+              >
+                💳 100원 결제하고 다운로드
+              </button>
+              <button
+                className={styles.paymentCancel}
+                onClick={() => setShowPayment(false)}
+              >
+                다음에 할게요
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Hero Banner */}
         <section className={styles.hero}>
           <div className={styles.heroOverlay} />
           <div className={styles.heroContent}>
-            <p className={styles.heroLabel}>Virtual Wedding Gallery</p>
+            <p className={styles.heroLabel}>추억 갤러리</p>
             <h1 className={styles.heroTitle}>
               우리의 특별한
               <br />
@@ -214,7 +250,7 @@ export default function GalleryPage({
           {/* Action Bar */}
           <div className={styles.actionBar}>
             <div className={styles.actionLeft}>
-              <h2 className={styles.albumTitle}>💐 Wedding Album</h2>
+              <h2 className={styles.albumTitle}>💐 웨딩 앨범</h2>
             </div>
             <div className={styles.actionRight}>
               <button
@@ -222,20 +258,22 @@ export default function GalleryPage({
                 onClick={handleShare}
                 disabled={!hasImages}
               >
-                {copied ? '✅ 링크 복사됨!' : '🔗 공유하기'}
+                {copied ? '✅ 복사됨' : '🔗 공유'}
               </button>
               <button
                 className="btn btn-primary btn-small"
-                onClick={handleDownloadZip}
+                onClick={() => paid ? handleDownloadZip() : setShowPayment(true)}
                 disabled={!hasImages || downloading}
               >
                 {downloading ? (
                   <>
                     <span className="loader-ring" style={{ width: 16, height: 16, borderWidth: 2 }} />
-                    ZIP 만드는 중...
+                    다운로드 중...
                   </>
+                ) : paid ? (
+                  '📦 다운로드'
                 ) : (
-                  '📦 전체 다운로드 (ZIP)'
+                  '📦 다운로드 (₩100)'
                 )}
               </button>
             </div>
@@ -257,13 +295,13 @@ export default function GalleryPage({
                 {data.referencePhotos.her && (
                   <div className={styles.refCard}>
                     <img src={data.referencePhotos.her} alt="신부 원본" />
-                    <span className={styles.refTag}>FOR HER</span>
+                    <span className={styles.refTag}>신부</span>
                   </div>
                 )}
                 {data.referencePhotos.him && (
                   <div className={styles.refCard}>
                     <img src={data.referencePhotos.him} alt="신랑 원본" />
-                    <span className={styles.refTag}>FOR HIM</span>
+                    <span className={styles.refTag}>신랑</span>
                   </div>
                 )}
               </div>
