@@ -59,6 +59,16 @@
   z-index: 1;
 }
 
+.homeLink {
+  display: inline-block;
+  color: rgba(255,255,255,0.7);
+  font-size: 0.85rem;
+  text-decoration: none;
+  margin-bottom: var(--space-md);
+  transition: color 0.2s;
+}
+.homeLink:hover { color: #fff; }
+
 .heroLabel {
   font-size: 0.75rem;
   letter-spacing: 0.2em;

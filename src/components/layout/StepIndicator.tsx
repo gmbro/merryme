@@ -6,16 +6,14 @@ interface StepIndicatorProps {
 }
 
 const STEP_LABELS = [
-  '사진 업로드',
   '스냅사진',
-  '스타일링',
-  '결혼식장',
+  '예식장',
   '신혼여행',
 ];
 
 export default function StepIndicator({
   currentStep,
-  totalSteps = 5,
+  totalSteps = 3,
 }: StepIndicatorProps) {
   return (
     <div className="step-indicator" role="navigation" aria-label="진행 단계">

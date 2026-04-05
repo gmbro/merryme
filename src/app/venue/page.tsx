@@ -115,7 +115,7 @@ function VenueContent() {
 
   return (
     <div className={styles.content}>
-      <StepIndicator currentStep={4} />
+      <StepIndicator currentStep={2} />
 
       <div className={styles.headerSection}>
         <h1>결혼식장 미리보기</h1>

@@ -57,18 +57,15 @@ const IconPlane = () => (
 
 const IconGallery = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="3" width="18" height="18" rx="2" />
-    <circle cx="8.5" cy="8.5" r="1.5" />
-    <path d="M21 15l-5-5L5 21" />
+    <polygon points="5 3 19 12 5 21 5 3" />
   </svg>
 );
 
 const JOURNEY_STEPS = [
   { icon: <IconCamera />, title: '스냅사진', desc: '테마별 웨딩 스냅' },
-  { icon: <IconDress />, title: '스타일링', desc: '드레스 & 메이크업' },
   { icon: <IconChurch />, title: '예식장', desc: '결혼식장 시뮬레이션' },
   { icon: <IconPlane />, title: '신혼여행', desc: '꿈의 여행지' },
-  { icon: <IconGallery />, title: '갤러리', desc: '모든 사진 모아보기' },
+  { icon: <IconGallery />, title: '갤러리', desc: '영상으로 감상하기' },
 ];
 
 /* ─── 서버 얼굴 검증 (Gemini API) ─── */

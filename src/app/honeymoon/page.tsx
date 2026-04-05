@@ -78,7 +78,7 @@ function HoneymoonContent() {
 
   return (
     <div className={styles.content}>
-      <StepIndicator currentStep={5} />
+      <StepIndicator currentStep={3} />
 
       <div className={styles.headerSection}>
         <p className="text-label">Step 5 — Virtual Honeymoon</p>

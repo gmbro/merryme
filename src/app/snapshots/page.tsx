@@ -191,7 +191,7 @@ function SnapshotsContent() {
         </svg>
         메인으로
       </button>
-      <StepIndicator currentStep={2} />
+      <StepIndicator currentStep={1} />
 
       <div className={styles.headerSection}>
         <h1>가상 스냅사진 생성</h1>
@@ -275,10 +275,10 @@ function SnapshotsContent() {
             <p className={styles.nextHint}>마음에 드는 사진이 있으신가요?</p>
             <button
               className="btn btn-primary btn-large"
-              onClick={() => router.push(`/styling?session=${sessionId}`)}
+              onClick={() => router.push(`/venue?session=${sessionId}`)}
               style={{ width: '100%', maxWidth: 360 }}
             >
-              다음: 드레스 & 메이크업
+              다음: 예식장 시뮬레이션
             </button>
             <button
               className="btn btn-secondary"
