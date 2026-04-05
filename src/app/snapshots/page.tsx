@@ -69,7 +69,7 @@ const THEMES = [
   },
 ];
 
-const MAX_SELECT = 2;
+const MAX_SELECT = 1;
 
 /* ─── SVG Pictograms ─── */
 const IconCamera = () => (

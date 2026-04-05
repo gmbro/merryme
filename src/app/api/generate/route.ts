@@ -12,7 +12,7 @@ import {
   MakeupType,
 } from '@/lib/gemini/prompts';
 
-export const maxDuration = 60; // Vercel timeout
+export const maxDuration = 120; // Vercel timeout — longer for retries
 
 interface GenerateBody {
   sessionId: string;
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
 
     // Call Gemini API with retry for rate limiting
     let response;
-    const MAX_RETRIES = 3;
+    const MAX_RETRIES = 4;
     
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       try {
@@ -129,11 +129,12 @@ export async function POST(request: NextRequest) {
         const errMsg = apiError instanceof Error ? apiError.message : String(apiError);
         console.error(`Gemini API attempt ${attempt + 1}/${MAX_RETRIES}:`, errMsg);
         
-        // Rate limit — retry with backoff
+        // Rate limit — retry with aggressive backoff
         if (errMsg.includes('429') || errMsg.includes('RATE') || errMsg.includes('quota') || errMsg.includes('RESOURCE_EXHAUSTED')) {
           if (attempt < MAX_RETRIES - 1) {
-            const delay = Math.pow(2, attempt + 1) * 1000; // 2s, 4s, 8s
-            console.log(`Rate limited, waiting ${delay}ms before retry...`);
+            const delays = [5000, 15000, 30000]; // 5s, 15s, 30s
+            const delay = delays[attempt] || 30000;
+            console.log(`Rate limited, waiting ${delay}ms before retry (attempt ${attempt + 1})...`);
             await new Promise(r => setTimeout(r, delay));
             continue;
           }
