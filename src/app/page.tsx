@@ -453,13 +453,9 @@ export default function LandingPage() {
 
       <footer className={styles.footer}>
         <div className="container">
-          <p className={styles.footerBrand}>메리미</p>
           <p className={styles.footerCompany}>(주)아키랩 · 개인정보보호 책임자 이경민</p>
           <p className={styles.footerCopy}>
             &copy; 2026 MerryMe · AI 기반 가상 결혼 체험
-          </p>
-          <p className={styles.footerNote}>
-            모든 이미지는 AI로 생성되며 실제 배경과 무관합니다
           </p>
           <div className={styles.footerLinks}>
             <a href="/privacy" className={styles.footerLink}>개인정보처리방침</a>
