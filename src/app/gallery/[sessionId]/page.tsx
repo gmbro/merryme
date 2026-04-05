@@ -220,10 +220,32 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
   const [error, setError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showSlideshow, setShowSlideshow] = useState(false);
   const [zoomImg, setZoomImg] = useState<string | null>(null);
+  const [isPaid, setIsPaid] = useState(false);
+  const [checkingPayment, setCheckingPayment] = useState(false);
   const { user, signInWithGoogle } = useAuth();
   const { exportVideo, exporting: videoExporting, progress: videoProgress } = useVideoExport();
+
+  // Check ?paid=true from Stripe redirect
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('paid') === 'true') {
+      setIsPaid(true);
+      window.history.replaceState({}, '', `/gallery/${sessionId}`);
+    }
+  }, [sessionId]);
+
+  // Verify payment server-side
+  useEffect(() => {
+    if (user && !isPaid) {
+      fetch(`/api/payment-status?sessionId=${sessionId}`)
+        .then(r => r.json())
+        .then(d => { if (d.paid) setIsPaid(true); })
+        .catch(() => {});
+    }
+  }, [user, sessionId, isPaid]);
 
   useEffect(() => {
     async function fetchGallery() {
@@ -261,6 +283,27 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
       setDownloading(false);
     }
   }, [sessionId]);
+
+  const handleVideoDownload = useCallback((allUrls: string[]) => {
+    if (!user) { setShowLoginModal(true); return; }
+    if (!isPaid) { setShowPaymentModal(true); return; }
+    exportVideo(allUrls, `MerryMe_Wedding_${sessionId.slice(0, 8)}.webm`);
+  }, [user, isPaid, exportVideo, sessionId]);
+
+  const handleCheckout = useCallback(async () => {
+    setCheckingPayment(true);
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId, userEmail: user?.email }),
+      });
+      const d = await res.json();
+      if (d.url) window.location.href = d.url;
+      else alert('결제 페이지를 열 수 없습니다.');
+    } catch { alert('결제 오류가 발생했습니다.'); }
+    finally { setCheckingPayment(false); }
+  }, [sessionId, user]);
 
   if (loading) {
     return (
@@ -333,6 +376,39 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
         </div>
       )}
 
+      {/* Payment Modal */}
+      {showPaymentModal && (
+        <div className={styles.paymentOverlay} onClick={() => setShowPaymentModal(false)}>
+          <div className={styles.paymentModal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.paymentBadge}>Premium</div>
+            <h3 className={styles.paymentTitle}>영상 다운로드</h3>
+            <p className={styles.paymentDesc}>
+              1080p 고화질 웨딩 영상을<br />다운로드 받으세요
+            </p>
+            <div className={styles.priceBox}>
+              <span className={styles.priceAmount}>$1</span>
+              <span className={styles.priceLabel}>1회 결제</span>
+            </div>
+            <ul className={styles.priceFeatures}>
+              <li>1080p Full HD 영상</li>
+              <li>Ken Burns 시네마틱 효과</li>
+              <li>모든 사진 포함</li>
+            </ul>
+            <button
+              className="btn btn-primary"
+              onClick={handleCheckout}
+              disabled={checkingPayment}
+              style={{ width: '100%', whiteSpace: 'nowrap' }}
+            >
+              {checkingPayment ? '결제 페이지 준비 중...' : '$1 결제하고 다운로드'}
+            </button>
+            <button className={styles.paymentCancel} onClick={() => setShowPaymentModal(false)}>
+              다음에 할게요
+            </button>
+          </div>
+        </div>
+      )}
+
       <main className={styles.main}>
         <div className="container">
           {/* No hero header — jump straight to images */}
@@ -374,14 +450,15 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
               </button>
               <button
                 className="btn btn-secondary btn-large"
-                onClick={() => {
-                  if (!user) { setShowLoginModal(true); return; }
-                  exportVideo(allSlideImages.map(i => i.url), `MerryMe_Wedding_${sessionId.slice(0, 8)}.webm`);
-                }}
+                onClick={() => handleVideoDownload(allSlideImages.map(i => i.url))}
                 disabled={videoExporting}
                 style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }}
               >
-                {videoExporting ? `영상 생성 중... ${videoProgress}%` : '영상 다운로드 (1080p)'}
+                {videoExporting
+                  ? `영상 생성 중... ${videoProgress}%`
+                  : isPaid
+                    ? '영상 다운로드 (1080p)'
+                    : '영상 다운로드 ($1)'}
               </button>
               <button
                 className="btn btn-secondary btn-large"
