@@ -1,37 +1,17 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-
 import StepIndicator from '@/components/layout/StepIndicator';
 import styles from './page.module.css';
 
 const VENUE_STYLES = [
-  { id: 'garden', name: '정원 웨딩', desc: '야외 정원, 자연광, 꽃 아치', preview: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400&h=300&fit=crop', style: 'Outdoor garden wedding venue with floral arch, natural sunlight, lush greenery, white chairs, warm afternoon light, flower-lined aisle' },
-  { id: 'hotel', name: '호텔 웨딩', desc: '화려한 샹들리에, 클래식 연회장', preview: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400&h=300&fit=crop', style: 'Luxury hotel ballroom wedding with crystal chandeliers, gold accents, white draping, elegant table settings, marble floor' },
-  { id: 'beach', name: '해변 웨딩', desc: '해변 석양, 로맨틱 분위기', preview: 'https://images.unsplash.com/photo-1545232979-8bf68ee9b1af?w=400&h=300&fit=crop', style: 'Beach wedding at golden sunset with white fabric canopy, ocean waves, tropical flowers, barefoot on white sand' },
-  { id: 'rooftop', name: '루프탑 웨딩', desc: '도심 스카이라인, 시티뷰', preview: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400&h=300&fit=crop', style: 'Rooftop wedding with city skyline view at twilight, string lights, modern minimalist decoration, urban chic atmosphere' },
-  { id: 'hanok', name: '한옥 웨딩', desc: '전통 한옥, 한국 전통혼례', preview: 'https://images.unsplash.com/photo-1577717903315-1691ae25ab3f?w=400&h=300&fit=crop', style: 'Traditional Korean Hanok wedding venue with wooden architecture, paper lanterns, traditional decorations, courtyard ceremony' },
-  { id: 'cathedral', name: '성당 웨딩', desc: '고딕 성당, 스테인드글라스', preview: 'https://images.unsplash.com/photo-1543489822-c49534f3271f?w=400&h=300&fit=crop', style: 'Grand cathedral wedding with tall Gothic arches, stained glass windows casting colorful light, stone columns, white flower arrangements along the aisle' },
-];
-
-interface VenueItem {
-  id: number;
-  name: string;
-  address: string;
-  lat: number | null;
-  lng: number | null;
-  phone: string | null;
-  hallCount: number | null;
-  sido: string | null;
-  sigungu: string | null;
-}
-
-const SIDO_LIST = [
-  '서울특별시', '부산광역시', '대구광역시', '인천광역시',
-  '광주광역시', '대전광역시', '울산광역시', '세종특별자치시',
-  '경기도', '강원특별자치도', '충청북도', '충청남도',
-  '전북특별자치도', '전라남도', '경상북도', '경상남도', '제주특별자치도',
+  { id: 'garden', name: '정원 웨딩', style: 'Elegant outdoor garden wedding with lush greenery, flower arches, and natural sunlight', preview: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400&h=300&fit=crop' },
+  { id: 'hotel', name: '호텔 웨딩', style: 'Luxurious hotel ballroom wedding with crystal chandeliers, elegant draping, and warm golden lighting', preview: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400&h=300&fit=crop' },
+  { id: 'beach', name: '해변 웨딩', style: 'Romantic beach wedding ceremony with ocean backdrop, white fabric canopy, sunset golden hour', preview: 'https://images.unsplash.com/photo-1545232979-8bf68ee9b1af?w=400&h=300&fit=crop' },
+  { id: 'rooftop', name: '루프탑 웨딩', style: 'Modern rooftop wedding with city skyline backdrop, string lights, minimalist elegant decor', preview: 'https://images.unsplash.com/photo-1470076892663-af684e5e15af?w=400&h=300&fit=crop' },
+  { id: 'hanok', name: '한옥 웨딩', style: 'Traditional Korean hanok wedding with wooden architecture, paper lanterns, courtyard ceremony in hanbok', preview: 'https://images.unsplash.com/photo-1548115184-bc6544d06a58?w=400&h=300&fit=crop' },
+  { id: 'cathedral', name: '성당 웨딩', style: 'Grand cathedral wedding with stained glass windows, high vaulted ceilings, dramatic organ pipes, candlelight', preview: 'https://images.unsplash.com/photo-1543489822-c49534f3271f?w=400&h=300&fit=crop' },
 ];
 
 function VenueContent() {
@@ -39,19 +19,11 @@ function VenueContent() {
   const router = useRouter();
   const sessionId = searchParams.get('session');
 
-  // Style selection
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
-
-  // Real venue search
-  const [activeTab, setActiveTab] = useState<'style' | 'search'>('style');
-  const [sido, setSido] = useState('');
-  const [realVenues, setRealVenues] = useState<VenueItem[]>([]);
-  const [searchLoading, setSearchLoading] = useState(false);
-  const [totalVenues, setTotalVenues] = useState(0);
-  const [selectedVenueDetail, setSelectedVenueDetail] = useState<VenueItem | null>(null);
+  const [zoomImg, setZoomImg] = useState<string | null>(null);
 
   if (!sessionId) {
     return (
@@ -71,27 +43,20 @@ function VenueContent() {
     setImages([]);
 
     try {
-      // Generate 4 images with different angles
-      const angleCount = 4;
-      for (let i = 0; i < angleCount; i++) {
-        try {
-          const res = await fetch('/api/generate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              sessionId,
-              step: 'venue',
-              options: { venueStyle: venueData.style, angleIndex: i },
-            }),
-          });
-          const data = await res.json();
-          if (res.ok && data.images) {
-            setImages((prev) => [...prev, ...data.images]);
-          }
-        } catch {
-          // continue with other angles
-        }
-      }
+      const fetchAngle = (angle: number) =>
+        fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId, step: 'venue', options: { venueStyle: venueData.style, angleIndex: angle } }),
+        })
+          .then(r => r.json())
+          .then(data => {
+            if (data.images?.length > 0) setImages(prev => [...prev, ...data.images]);
+          })
+          .catch(() => {});
+
+      await Promise.all([fetchAngle(0), fetchAngle(1)]);
+      await Promise.all([fetchAngle(2), fetchAngle(3)]);
     } catch (err) {
       setError(err instanceof Error ? err.message : '오류 발생');
     } finally {
@@ -99,236 +64,88 @@ function VenueContent() {
     }
   };
 
-  const handleSearch = async () => {
-    if (!sido) return;
-    setSearchLoading(true);
-    try {
-      const res = await fetch(`/api/venues?sido=${encodeURIComponent(sido)}&size=50`);
-      const data = await res.json();
-      if (data.success) {
-        setRealVenues(data.venues || []);
-        setTotalVenues(data.total || 0);
-      }
-    } catch {
-      console.error('Venue search failed');
-    } finally {
-      setSearchLoading(false);
-    }
-  };
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  useEffect(() => {
-    if (sido) handleSearch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sido]);
-
   return (
     <div className={styles.content}>
-      <StepIndicator currentStep={2} />
-
-      <div className={styles.headerSection}>
-        <h1>결혼식장 미리보기</h1>
-        <p className={styles.subtitle}>
-          꿈꾸던 결혼식장 스타일을 선택하거나, 실제 예식장을 검색해보세요.
-        </p>
-      </div>
-
-      {/* Tab Switcher */}
-      <div className={styles.tabBar}>
-        <button
-          className={`${styles.tab} ${activeTab === 'style' ? styles.tabActive : ''}`}
-          onClick={() => setActiveTab('style')}
-        >
-          ✨ 스타일 선택
-        </button>
-        <button
-          className={`${styles.tab} ${activeTab === 'search' ? styles.tabActive : ''}`}
-          onClick={() => setActiveTab('search')}
-        >
-          🔍 실제 예식장 검색
-        </button>
-      </div>
-
-      {activeTab === 'style' && (
-        <>
-          {/* Style Grid */}
-          <section className={styles.venueSection}>
-            <div className={styles.venueGrid}>
-              {VENUE_STYLES.map((v) => {
-                const isSelected = selectedStyle === v.id;
-                return (
-                  <button
-                    key={v.id}
-                    className={`${styles.venueCard} ${isSelected ? styles.venueSelected : ''}`}
-                    onClick={() => setSelectedStyle(v.id)}
-                  >
-                    <div className={styles.venuePreview}>
-                      <img src={v.preview} alt={v.name} className={styles.venuePreviewImg} />
-                      {isSelected && (
-                        <div className={styles.venueSelectedBadge}>
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
-                        </div>
-                      )}
-                    </div>
-                    <span className={styles.venueName}>{v.name}</span>
-                    <span className={styles.venueDesc}>{v.desc}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-
-          <div className={styles.generateSection}>
-            <button
-              className="btn btn-primary btn-large"
-              onClick={handleGenerate}
-              disabled={!selectedStyle || generating}
-            >
-              {generating ? '📷 사진작가가 멋지게 촬영 중이에요...' : '💒 결혼식 시뮬레이션 시작'}
-            </button>
-            {error && <p className={styles.errorMsg}>⚠️ {error}</p>}
-          </div>
-        </>
+      {zoomImg && (
+        <div className={styles.zoomOverlay} onClick={() => setZoomImg(null)}>
+          <img src={zoomImg} alt="확대" className={styles.zoomImage} />
+          <button className={styles.zoomClose} onClick={() => setZoomImg(null)}>✕</button>
+        </div>
       )}
 
-      {activeTab === 'search' && (
-        <section className={styles.searchSection}>
-          {/* Filters */}
-          <div className={styles.searchFilters}>
-            <div className={styles.filterGroup}>
-              <label className={styles.filterLabel}>지역 선택</label>
-              <select
-                className={styles.filterSelect}
-                value={sido}
-                onChange={(e) => setSido(e.target.value)}
-              >
-                <option value="">전체 지역</option>
-                {SIDO_LIST.map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Results */}
-          {searchLoading ? (
-            <div className={styles.searchLoading}>
-              <span className="loader-ring" style={{ width: 32, height: 32, borderWidth: 3 }} />
-              <p>예식장을 검색하고 있어요...</p>
-            </div>
-          ) : realVenues.length > 0 ? (
-            <>
-              <p className={styles.resultCount}>총 {totalVenues}개의 예식장</p>
-              <div className={styles.venueList}>
-                {realVenues.map((v) => (
-                  <div
-                    key={v.id}
-                    className={styles.venueListCard}
-                    onClick={() => setSelectedVenueDetail(v)}
-                  >
-                    <div className={styles.venueListIcon}>🏛️</div>
-                    <div className={styles.venueListInfo}>
-                      <h4 className={styles.venueListName}>{v.name}</h4>
-                      <p className={styles.venueListAddr}>{v.address}</p>
-                      <div className={styles.venueListMeta}>
-                        {v.phone && <span>📞 {v.phone}</span>}
-                        {v.hallCount && <span>🏠 예식홀 {v.hallCount}개</span>}
-                      </div>
-                    </div>
-                    <span className={styles.venueListArrow}>›</span>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : sido ? (
-            <div className={styles.noResults}>
-              <p>😅 해당 지역에 등록된 예식장이 없습니다.</p>
-              <p className={styles.noResultsHint}>
-                공공데이터 API 키가 설정되지 않았을 수 있습니다.
-                <br />
-                스타일 선택 탭에서 AI 시뮬레이션을 이용해보세요!
-              </p>
-            </div>
-          ) : (
-            <div className={styles.noResults}>
-              <p>지역을 선택하면 실제 예식장 정보를 검색합니다.</p>
-            </div>
-          )}
-        </section>
-      )}
-
-      {/* Venue Detail Modal */}
-      {selectedVenueDetail && (
-        <div className={styles.detailOverlay} onClick={() => setSelectedVenueDetail(null)}>
-          <div className={styles.detailModal} onClick={(e) => e.stopPropagation()}>
-            <button className={styles.detailClose} onClick={() => setSelectedVenueDetail(null)}>✕</button>
-            <div className={styles.detailHeader}>
-              <span className={styles.detailEmoji}>🏛️</span>
-              <h3>{selectedVenueDetail.name}</h3>
-            </div>
-            <div className={styles.detailBody}>
-              <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>📍 주소</span>
-                <span>{selectedVenueDetail.address || '정보 없음'}</span>
-              </div>
-              {selectedVenueDetail.phone && (
-                <div className={styles.detailRow}>
-                  <span className={styles.detailLabel}>📞 전화번호</span>
-                  <a href={`tel:${selectedVenueDetail.phone}`} className={styles.detailLink}>
-                    {selectedVenueDetail.phone}
-                  </a>
-                </div>
-              )}
-              {selectedVenueDetail.hallCount && (
-                <div className={styles.detailRow}>
-                  <span className={styles.detailLabel}>🏠 예식홀 수</span>
-                  <span>{selectedVenueDetail.hallCount}개</span>
-                </div>
-              )}
-              {selectedVenueDetail.lat && selectedVenueDetail.lng && (
-                <div className={styles.detailMapLink}>
-                  <a
-                    href={`https://www.google.com/maps?q=${selectedVenueDetail.lat},${selectedVenueDetail.lng}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-secondary btn-small"
-                  >
-                    🗺️ Google Maps에서 보기
-                  </a>
-                  <a
-                    href={`https://map.naver.com/?lng=${selectedVenueDetail.lng}&lat=${selectedVenueDetail.lat}&title=${encodeURIComponent(selectedVenueDetail.name)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-secondary btn-small"
-                  >
-                    🗺️ 네이버 지도에서 보기
-                  </a>
-                </div>
-              )}
-            </div>
+      {generating && (
+        <div className={styles.loadingPopup}>
+          <div className={styles.loadingPopupContent}>
+            <span className="loader-ring" style={{ width: 36, height: 36, borderWidth: 3 }} />
+            <p className={styles.loadingPopupText}>사진작가가 멋지게 촬영중이에요</p>
+            <p className={styles.loadingPopupSub}>잠시만 기다려주세요...</p>
           </div>
         </div>
       )}
 
+      <button className={styles.homeBtn} onClick={() => router.push('/')}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+        메인으로
+      </button>
+      <StepIndicator currentStep={2} />
+
+      <div className={styles.headerSection}>
+        <h1>가상 결혼식장</h1>
+        <p className={styles.subtitle}>원하는 웨딩 스타일을 선택해주세요</p>
+      </div>
+
+      {/* Style Cards */}
+      <section className={styles.themeSection}>
+        <div className={styles.themeGrid}>
+          {VENUE_STYLES.map((v) => (
+            <button
+              key={v.id}
+              className={`${styles.themeCard} ${selectedStyle === v.id ? styles.themeCardSelected : ''}`}
+              onClick={() => setSelectedStyle(v.id)}
+              disabled={generating}
+            >
+              <div className={styles.themeImgWrap}>
+                <img src={v.preview} alt={v.name} className={styles.themeImg} />
+                {selectedStyle === v.id && (
+                  <div className={styles.themeCheck}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+                  </div>
+                )}
+              </div>
+              <span className={styles.themeName}>{v.name}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Generate */}
+      <div className={styles.generateSection}>
+        <button className="btn btn-primary btn-large" onClick={handleGenerate} disabled={!selectedStyle || generating} style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }}>
+          {generating ? '촬영 중...' : '결혼식 시뮬레이션 시작'}
+        </button>
+        {error && <p className={styles.errorMsg}>{error}</p>}
+      </div>
+
       {/* Generated Images */}
       {images.length > 0 && (
         <section className={styles.gallerySection}>
-          <h3 className={styles.sectionTitle}>📸 가상 결혼식 장면</h3>
+          <h3 className={styles.sectionTitle}>가상 결혼식 장면 <span className={styles.countBadge}>{images.length}장</span></h3>
           <div className={styles.gallery}>
             {images.map((url, i) => (
-              <div key={i} className={styles.imageCard}>
+              <div key={i} className={styles.imageCard} onClick={() => setZoomImg(url)} style={{ cursor: 'pointer' }}>
                 <img src={url} alt={`결혼식 ${i + 1}`} className={styles.generatedImage} />
+                <div className={styles.zoomHint}>확대</div>
               </div>
             ))}
           </div>
-
           <div className={styles.nextSection}>
-            <p className={styles.nextHint}>아름다운 결혼식이에요! 이제 신혼여행을 떠나볼까요? 🌴</p>
-            <button
-              className="btn btn-primary btn-large"
-              onClick={() => router.push(`/honeymoon?session=${sessionId}`)}
-            >
-              다음: 신혼여행 갤러리 →
+            <button className="btn btn-primary btn-large" onClick={() => router.push(`/honeymoon?session=${sessionId}`)} style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }} disabled={images.length < 4}>
+              다음: 신혼여행
+            </button>
+            <button className="btn btn-secondary" onClick={() => { setSelectedStyle(null); setImages([]); }} disabled={generating} style={{ whiteSpace: 'nowrap' }}>
+              다른 스타일로 다시 생성
             </button>
           </div>
         </section>
@@ -340,7 +157,6 @@ function VenueContent() {
 export default function VenuePage() {
   return (
     <>
-
       <main className={styles.main}>
         <div className="container">
           <Suspense fallback={<div className={styles.loading}><span className="loader-ring" /></div>}>
