@@ -65,11 +65,11 @@ const IconGallery = () => (
 );
 
 const JOURNEY_STEPS = [
-  { icon: <IconCamera />, title: '가상 스냅사진' },
-  { icon: <IconDress />, title: '드레스 & 메이크업' },
-  { icon: <IconChurch />, title: '결혼식장 미리보기' },
-  { icon: <IconPlane />, title: '신혼여행' },
-  { icon: <IconGallery />, title: '추억 갤러리' },
+  { icon: <IconCamera />, title: '스냅사진', desc: '테마별 웨딩 스냅' },
+  { icon: <IconDress />, title: '스타일링', desc: '드레스 & 메이크업' },
+  { icon: <IconChurch />, title: '예식장', desc: '결혼식장 시뮬레이션' },
+  { icon: <IconPlane />, title: '신혼여행', desc: '꿈의 여행지' },
+  { icon: <IconGallery />, title: '갤러리', desc: '모든 사진 모아보기' },
 ];
 
 /* ─── 서버 얼굴 검증 (Gemini API) ─── */
@@ -247,12 +247,17 @@ export default function LandingPage() {
             AI가 꿈같은 결혼 여정을 만들어 드려요
           </p>
 
-          {/* 여정 미니맵 */}
-          <div className={styles.journeyBar}>
+          {/* 여정 타임라인 */}
+          <div className={styles.journeyTimeline}>
             {JOURNEY_STEPS.map((step, i) => (
-              <div key={i} className={styles.journeyChip}>
-                <span className={styles.journeyChipIcon}>{step.icon}</span>
-                <span className={styles.journeyChipTitle}>{step.title}</span>
+              <div key={i} className={styles.journeyStep}>
+                <div className={styles.journeyStepNum}>{i + 1}</div>
+                <div className={styles.journeyStepIcon}>{step.icon}</div>
+                <div className={styles.journeyStepInfo}>
+                  <span className={styles.journeyStepTitle}>{step.title}</span>
+                  <span className={styles.journeyStepDesc}>{step.desc}</span>
+                </div>
+                {i < JOURNEY_STEPS.length - 1 && <div className={styles.journeyStepLine} />}
               </div>
             ))}
           </div>

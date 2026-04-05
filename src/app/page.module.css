@@ -189,48 +189,107 @@
 }
 
 /* ===========================
-   Journey Bar — Inline chips
+   Journey Timeline
    =========================== */
-.journeyBar {
+.journeyTimeline {
   display: flex;
-  flex-wrap: wrap;
+  align-items: flex-start;
   justify-content: center;
-  gap: 6px;
+  gap: 0;
   width: 100%;
+  padding: var(--space-sm) 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-.journeyChip {
+.journeyTimeline::-webkit-scrollbar {
+  display: none;
+}
+
+.journeyStep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  min-width: 68px;
+  padding: 0 2px;
+}
+
+.journeyStepNum {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 800;
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 5px 10px;
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: var(--radius-full);
-  border: 1px solid var(--color-border-light);
-  transition: all var(--transition-fast);
+  justify-content: center;
+  margin-bottom: 6px;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(180, 130, 80, 0.3);
 }
 
-.journeyChip:hover {
-  border-color: var(--color-primary-light);
-  box-shadow: var(--shadow-sm);
-}
-
-.journeyChipIcon {
+.journeyStepIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(212, 165, 116, 0.15), rgba(212, 165, 116, 0.06));
+  border: 1.5px solid var(--color-border-light);
   display: flex;
   align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+  transition: all var(--transition-base);
+}
+
+.journeyStepIcon svg {
+  width: 18px;
+  height: 18px;
   color: var(--color-primary);
 }
 
-.journeyChipIcon svg {
-  width: 14px;
-  height: 14px;
+.journeyStep:hover .journeyStepIcon {
+  border-color: var(--color-primary-light);
+  background: linear-gradient(135deg, rgba(212, 165, 116, 0.25), rgba(212, 165, 116, 0.1));
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(180, 130, 80, 0.15);
 }
 
-.journeyChipTitle {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--color-text-secondary);
+.journeyStepInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.journeyStepTitle {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
   white-space: nowrap;
+}
+
+.journeyStepDesc {
+  font-size: 0.58rem;
+  color: var(--color-text-light);
+  white-space: nowrap;
+}
+
+.journeyStepLine {
+  position: absolute;
+  top: 10px;
+  left: calc(50% + 12px);
+  width: calc(100% - 24px);
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-primary-light), var(--color-border));
+  z-index: 1;
+  right: calc(-50% + 12px);
+  width: calc(100%);
+  left: 50%;
 }
 
 /* ===========================
