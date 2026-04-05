@@ -248,7 +248,17 @@ export default function LandingPage() {
             AI가 꿈같은 결혼 여정을 만들어 드려요
           </p>
 
-          {/* 사진 업로드 — 나란히 */}
+          {/* 여정 미니맵 */}
+          <div className={styles.journeyBar}>
+            {JOURNEY_STEPS.map((step, i) => (
+              <div key={i} className={styles.journeyChip}>
+                <span className={styles.journeyChipIcon}>{step.icon}</span>
+                <span className={styles.journeyChipTitle}>{step.title}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* 사진 업로드 */}
           <div className={styles.uploadArea}>
             <div className={styles.uploadCard}>
               <label className={styles.uploadZone} data-filled={!!herPreview}>
@@ -338,34 +348,24 @@ export default function LandingPage() {
             )}
           </button>
 
-          {!canStart && (
-            <p className={styles.startHint}>
-              두 분의 사진을 모두 올리면 시작할 수 있어요
-            </p>
-          )}
-
-          {/* 여정 미니맵 — 인라인 */}
-          <div className={styles.journeyBar}>
-            {JOURNEY_STEPS.map((step, i) => (
-              <div key={i} className={styles.journeyChip}>
-                <span className={styles.journeyChipIcon}>{step.icon}</span>
-                <span className={styles.journeyChipTitle}>{step.title}</span>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
-      {/* Footer */}
       <footer className={styles.footer}>
         <div className="container">
           <p className={styles.footerBrand}>메리미</p>
+          <p className={styles.footerCompany}>(주)아키랩 · 대표이사 이경민</p>
           <p className={styles.footerCopy}>
-            © 2026 MerryMe · AI 기반 가상 결혼 체험
+            &copy; 2026 MerryMe · AI 기반 가상 결혼 체험
           </p>
           <p className={styles.footerNote}>
             모든 이미지는 AI로 생성되며 실제 인물과 무관합니다
           </p>
+          <div className={styles.footerLinks}>
+            <a href="/privacy" className={styles.footerLink}>개인정보처리방침</a>
+            <span className={styles.footerDivider}>·</span>
+            <a href="/terms" className={styles.footerLink}>이용약관</a>
+          </div>
         </div>
       </footer>
     </>
