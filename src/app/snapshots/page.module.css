@@ -216,37 +216,53 @@
 .zoomOverlay {
   position: fixed;
   inset: 0;
-  z-index: 200;
+  z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,0.75);
+  background: rgba(0,0,0,0.88);
   backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   cursor: pointer;
+  padding: 16px;
+  animation: zoomFade 0.2s ease;
+}
+@keyframes zoomFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .zoomImage {
-  max-width: 90vw;
-  max-height: 85vh;
+  max-width: 92vw;
+  max-height: 80vh;
   object-fit: contain;
-  border-radius: var(--radius-lg);
-  box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  animation: zoomPop 0.25s ease;
+}
+@keyframes zoomPop {
+  from { transform: scale(0.9); opacity: 0.5; }
+  to { transform: scale(1); opacity: 1; }
 }
 
 .zoomClose {
   position: fixed;
-  top: 20px;
-  right: 24px;
-  background: rgba(255,255,255,0.9);
+  top: 12px;
+  right: 12px;
+  background: rgba(255,255,255,0.2);
   border: none;
-  font-size: 1.2rem;
+  color: #fff;
+  font-size: 1.3rem;
   cursor: pointer;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 10000;
 }
 
 @media (max-width: 480px) {

@@ -114,18 +114,20 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Add text prompt with STRONG reference photo instruction
+    // Add text prompt with reference photo instruction
+    // Note: Face Swap API will replace faces post-generation, so focus on body accuracy
     const refInstruction = referenceImages.length > 0 
       ? `
 
-=== CRITICAL CHARACTER CONSISTENCY INSTRUCTIONS ===
+=== CHARACTER CONSISTENCY INSTRUCTIONS ===
 The ${referenceImages.length} reference photo(s) above show the REAL people who must appear in the generated image.
-1. FACE: Copy the EXACT face shape, eye shape, nose, lips, jawline, eyebrows from the reference photos. The faces must be recognizable as the SAME people.
-2. SKIN: Match the exact skin tone and complexion.
+1. BODY: The bride is approximately 169cm tall. The groom is approximately 180cm tall. Match these proportions.
+2. SKIN: Match the exact skin tone and complexion from the reference photos.
 3. HAIR: Same hairstyle, hair color, hair length, hair texture.
-4. BODY: Same body type, height proportion, build.
-5. GENDER: Do NOT change genders. If reference shows two males, generate two males. If two females, generate two females.
-6. The people in the output image must look like they could be the SAME INDIVIDUALS photographed on a different day, NOT different people.
+4. BODY TYPE: Same body type and build as the reference photos.
+5. GENDER: Do NOT change genders. First reference = bride (female), second reference = groom (male).
+6. FACE: Generate faces that closely resemble the reference photos. The faces should be clearly visible and well-lit.
+7. The people in the output image must look natural and proportionate.
 === END CHARACTER INSTRUCTIONS ===`
       : '';
     contents.push({ text: prompt + refInstruction });

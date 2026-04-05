@@ -443,6 +443,8 @@ export default function LandingPage() {
                 <span className="loader-ring" style={{ width: 18, height: 18, borderWidth: 2 }} />
                 업로드 중...
               </>
+            ) : canStart ? (
+              '스냅사진 찍으러 가기'
             ) : (
               '우리의 여정 시작하기'
             )}
