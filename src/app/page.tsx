@@ -353,8 +353,10 @@ export default function LandingPage() {
             ))}
           </div>
 
-          {/* 사진 업로드 */}
+          {/* 사진 업로드 — 3장 나란히 */}
           <div className={styles.uploadArea}>
+
+            {/* 신부 얼굴 */}
             <div className={styles.uploadCard}>
               <label className={styles.uploadZone} data-filled={!!herPreview}>
                 {herPreview ? (
@@ -377,22 +379,47 @@ export default function LandingPage() {
                 {validating === 'her' ? (
                   <span className={styles.uploadValidating}>
                     <span className="loader-ring" style={{ width: 14, height: 14, borderWidth: 2 }} />
-                    사진 확인 중...
+                    확인 중...
                   </span>
                 ) : herPreview ? (
-                  <span className={styles.uploadDone}>업로드 완료</span>
+                  <span className={styles.uploadDone}>✓ 완료</span>
                 ) : (
-                  '예비신부 단독사진'
+                  '신부 얼굴'
                 )}
               </span>
             </div>
 
-            <div className={styles.heartArea}>
-              <svg className={styles.heartSvg} viewBox="0 0 24 24" fill="var(--color-accent)">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-              </svg>
+            {/* 커플 전신 (가운데, 세로형) */}
+            <div className={styles.uploadCardCouple}>
+              <label className={styles.uploadZoneRect} data-filled={!!couplePreview}>
+                {couplePreview ? (
+                  <img src={couplePreview} alt="커플 전신" className={styles.previewImgRect} />
+                ) : (
+                  <img src="/guide-couple.png" alt="커플 체형 가이드" className={styles.guideImgRect} />
+                )}
+                <input
+                  ref={coupleInputRef}
+                  type="file"
+                  accept="image/*"
+                  className={styles.fileInput}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handleFile(f, 'couple');
+                  }}
+                />
+              </label>
+              <span className={styles.uploadLabelText}>
+                {validating === 'couple' ? (
+                  <span className={styles.uploadValidating}>등록 중...</span>
+                ) : couplePreview ? (
+                  <span className={styles.uploadDone}>✓ 완료</span>
+                ) : (
+                  <span>커플 전신 <span style={{ color: 'var(--color-primary)', fontWeight: 600 }}>선택</span></span>
+                )}
+              </span>
             </div>
 
+            {/* 신랑 얼굴 */}
             <div className={styles.uploadCard}>
               <label className={styles.uploadZone} data-filled={!!himPreview}>
                 {himPreview ? (
@@ -415,53 +442,16 @@ export default function LandingPage() {
                 {validating === 'him' ? (
                   <span className={styles.uploadValidating}>
                     <span className="loader-ring" style={{ width: 14, height: 14, borderWidth: 2 }} />
-                    사진 확인 중...
+                    확인 중...
                   </span>
                 ) : himPreview ? (
-                  <span className={styles.uploadDone}>업로드 완료</span>
+                  <span className={styles.uploadDone}>✓ 완료</span>
                 ) : (
-                  '예비신랑 단독사진'
+                  '신랑 얼굴'
                 )}
               </span>
             </div>
-          </div>
 
-          <div className={styles.uploadCards} style={{ marginTop: '1.5rem' }}>
-            <div className={styles.uploadCard} style={{ width: '100%', maxWidth: '100%' }}>
-              <label 
-                className={styles.uploadZone} 
-                data-filled={!!couplePreview}
-                style={{ aspectRatio: '3/1', height: '120px' }}
-              >
-                {couplePreview ? (
-                  <img src={couplePreview} alt="커플 전신" className={styles.previewImg} />
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: 'var(--text-tertiary)' }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                    <span style={{ fontSize: '0.9rem' }}>자연스러운 체형 생성용 (배경 제한 없음)</span>
-                  </div>
-                )}
-                <input
-                  ref={coupleInputRef}
-                  type="file"
-                  accept="image/*"
-                  className={styles.fileInput}
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) handleFile(f, 'couple');
-                  }}
-                />
-              </label>
-              <span className={styles.uploadLabelText}>
-                {validating === 'couple' ? (
-                  <span className={styles.uploadValidating}>등록 중...</span>
-                ) : couplePreview ? (
-                  <span className={styles.uploadDone}>커플 사진 등록 완료</span>
-                ) : (
-                  '커플 전신 사진 (선택 사항)'
-                )}
-              </span>
-            </div>
           </div>
 
           {/* 이미지 가이드 버튼 */}

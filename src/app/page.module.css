@@ -67,23 +67,34 @@
   word-break: keep-all;
 }
 
-/* Upload Area — 나란히 */
+/* Upload Area — 3장 나란히 */
 .uploadArea {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  gap: var(--space-sm);
+  gap: 10px;
   width: 100%;
   margin-top: var(--space-sm);
 }
 
+/* 원형 카드 (신부/신랑) */
 .uploadCard {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
   flex: 1;
-  max-width: 140px;
+  max-width: 120px;
+}
+
+/* 커플 전신 카드 — 조금 더 넓은 직사각형 */
+.uploadCardCouple {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1.4;
+  max-width: 160px;
 }
 
 .uploadZone {
@@ -127,6 +138,54 @@
   opacity: 0.5;
   filter: grayscale(20%);
   transition: opacity 0.3s;
+}
+
+/* 커플 전신 업로드존 — 직사각형 */
+.uploadZoneRect {
+  position: relative;
+  width: 100%;
+  height: 130px;
+  border-radius: 16px;
+  border: 2.5px dashed var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  overflow: hidden;
+  background: rgba(255,255,255,0.7);
+}
+
+.uploadZoneRect:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-glow);
+}
+
+.uploadZoneRect[data-filled="true"] {
+  border-style: solid;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-glow);
+}
+
+.previewImgRect {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+.guideImgRect {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 14px;
+  opacity: 0.55;
+  filter: grayscale(15%);
+  transition: opacity 0.3s;
+}
+
+.uploadZoneRect:hover .guideImgRect {
+  opacity: 0.8;
 }
 
 .uploadZone:hover .guideImg {
