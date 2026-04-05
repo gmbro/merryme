@@ -10,6 +10,7 @@
   flex-direction: column;
   position: relative;
   padding-bottom: var(--space-lg);
+  overflow: hidden;
 }
 
 .heroInner {
