@@ -78,10 +78,10 @@ async function validateFaceServer(file: File, type: 'her' | 'him'): Promise<{ va
     formData.append('file', file);
     formData.append('type', type);
     const res = await fetch('/api/validate-face', { method: 'POST', body: formData });
-    if (!res.ok) return { valid: true }; // 서버 오류 시 허용
-    return await res.json();
+    const data = await res.json();
+    return data;
   } catch {
-    return { valid: true }; // 네트워크 오류 시 허용
+    return { valid: false, reason: '사진 검증에 실패했어요. 다시 시도해주세요.' };
   }
 }
 
