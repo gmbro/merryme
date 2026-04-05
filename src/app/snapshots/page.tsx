@@ -2,6 +2,8 @@
 
 import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { useSession } from '@/hooks/useSession';
+import { usePersistedState } from '@/hooks/usePersistedState';
 import StepIndicator from '@/components/layout/StepIndicator';
 import Footer from '@/components/layout/Footer';
 import styles from './page.module.css';
@@ -19,11 +21,11 @@ const THEMES = [
 function SnapshotsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const sessionId = searchParams.get('session');
+  const { sessionId, getStepUrl } = useSession(searchParams.get('session'));
 
-  const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
+  const [selectedTheme, setSelectedTheme] = usePersistedState<string | null>(`merryme_snapshots_theme_${sessionId}`, null);
   const [generating, setGenerating] = useState(false);
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = usePersistedState<string[]>(`merryme_snapshots_images_${sessionId}`, []);
   const [error, setError] = useState<string | null>(null);
   const [zoomImg, setZoomImg] = useState<string | null>(null);
 
@@ -140,7 +142,7 @@ function SnapshotsContent() {
             ))}
           </div>
           <div className={styles.nextSection}>
-            <button className="btn btn-primary btn-large" onClick={() => router.push(`/venue?session=${sessionId}`)} style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }} disabled={images.length < 2}>
+            <button className="btn btn-primary btn-large" onClick={() => router.push(getStepUrl('venue'))} style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }} disabled={images.length < 2}>
               다음: 예식장 시뮬레이션
             </button>
             <button className="btn btn-secondary" onClick={() => { setSelectedTheme(null); setImages([]); }} disabled={generating} style={{ whiteSpace: 'nowrap' }}>

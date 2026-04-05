@@ -168,22 +168,20 @@ function ImageGuideModal({ onClose }: { onClose: () => void }) {
             <p>여러 명이 함께<br />찍은 단체 사진</p>
           </div>
         </div>
+        <div style={{ marginTop: 24, padding: 16, background: '#f8f9fa', borderRadius: 12 }}>
+          <h4 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>💡 더 자연스럽게 만들고 싶다면?</h4>
+          <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+            '커플 전신 사진'을 선택 사항으로 올려주세요! AI가 두 사람의 키 차이, 체격 밸런스, 분위기를 파악해서 더 자연스럽게 합성합니다. (배경이 복잡해도 괜찮습니다)
+          </p>
+        </div>
         <ul className={styles.guideRules}>
           <li>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2"><polyline points="20 6 9 17 4 12" /></svg>
-            얼굴이 잘 보이는 사진
+            얼굴 단독컷은 크게 나온 사진 필수
           </li>
           <li>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2"><polyline points="20 6 9 17 4 12" /></svg>
-            상반신 이상이 포함된 사진
-          </li>
-          <li>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2"><polyline points="20 6 9 17 4 12" /></svg>
-            밝고 선명한 조명의 사진
-          </li>
-          <li>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2"><polyline points="20 6 9 17 4 12" /></svg>
-            10MB 이하 · JPG, PNG 형식
+            선명한 조명과 화질 (10MB 이하)
           </li>
         </ul>
         <button className="btn btn-primary" onClick={onClose} style={{ width: '100%', marginTop: 16 }}>
@@ -199,18 +197,21 @@ export default function LandingPage() {
   const router = useRouter();
   const [herFile, setHerFile] = useState<File | null>(null);
   const [himFile, setHimFile] = useState<File | null>(null);
+  const [coupleFile, setCoupleFile] = useState<File | null>(null);
   const [herPreview, setHerPreview] = useState<string | null>(null);
   const [himPreview, setHimPreview] = useState<string | null>(null);
+  const [couplePreview, setCouplePreview] = useState<string | null>(null);
   const [isStarting, setIsStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showGuide, setShowGuide] = useState(false);
-  const [validating, setValidating] = useState<'her' | 'him' | null>(null);
+  const [validating, setValidating] = useState<'her' | 'him' | 'couple' | null>(null);
   const herInputRef = useRef<HTMLInputElement>(null);
   const himInputRef = useRef<HTMLInputElement>(null);
+  const coupleInputRef = useRef<HTMLInputElement>(null);
 
   const canStart = herFile && himFile;
 
-  const handleFile = async (file: File, type: 'her' | 'him') => {
+  const handleFile = async (file: File, type: 'her' | 'him' | 'couple') => {
     if (!file.type.startsWith('image/')) {
       setError('이미지 파일만 업로드할 수 있어요');
       return;
@@ -220,20 +221,19 @@ export default function LandingPage() {
       return;
     }
 
-    // 얼굴/체형 검증 (Gemini API - 서버 사이드)
-    setValidating(type);
-    setError(null);
-    const result = await validateFaceServer(file, type);
-    setValidating(null);
-    if (!result.valid) {
-      setError(result.reason || '적합한 사진이 아니에요.');
-      if (type === 'her' && herInputRef.current) herInputRef.current.value = '';
-      if (type === 'him' && himInputRef.current) himInputRef.current.value = '';
-      return;
-    }
-    // 검증 통과했지만 경고가 있는 경우 (검증 서비스 일시 오류)
-    if (result.warning) {
-      setError(result.warning);
+    // Optional: No strict validation for couple photo (background is allowed)
+    if (type !== 'couple') {
+      setValidating(type);
+      setError(null);
+      const result = await validateFaceServer(file, type);
+      setValidating(null);
+      if (!result.valid) {
+        setError(result.reason || '적합한 사진이 아니에요.');
+        if (type === 'her' && herInputRef.current) herInputRef.current.value = '';
+        if (type === 'him' && himInputRef.current) himInputRef.current.value = '';
+        return;
+      }
+      if (result.warning) setError(result.warning);
     }
 
     const reader = new FileReader();
@@ -242,16 +242,19 @@ export default function LandingPage() {
       if (type === 'her') {
         setHerFile(file);
         setHerPreview(url);
-      } else {
+      } else if (type === 'him') {
         setHimFile(file);
         setHimPreview(url);
+      } else {
+        setCoupleFile(file);
+        setCouplePreview(url);
       }
     };
     reader.readAsDataURL(file);
     setError(null);
   };
 
-  const uploadFile = async (file: File, type: 'her' | 'him', sessionId?: string) => {
+  const uploadFile = async (file: File, type: 'her' | 'him' | 'couple', sessionId?: string) => {
     // 업로드 전 이미지 압축 (413 방지)
     const compressed = await compressImage(file);
     
@@ -281,9 +284,12 @@ export default function LandingPage() {
     setIsStarting(true);
     setError(null);
     try {
-      const herResult = await uploadFile(herFile, 'her');
+      const herResult = await uploadFile(herFile!, 'her');
       const sessionId = herResult.sessionId;
-      await uploadFile(himFile, 'him', sessionId);
+      await uploadFile(himFile!, 'him', sessionId);
+      if (coupleFile) {
+        await uploadFile(coupleFile, 'couple', sessionId);
+      }
       router.push(`/snapshots?session=${sessionId}`);
     } catch (err) {
       let msg = '오류가 발생했습니다';
@@ -420,8 +426,46 @@ export default function LandingPage() {
             </div>
           </div>
 
+          <div className={styles.uploadCards} style={{ marginTop: '1.5rem' }}>
+            <div className={styles.uploadCard} style={{ width: '100%', maxWidth: '100%' }}>
+              <label 
+                className={styles.uploadZone} 
+                data-filled={!!couplePreview}
+                style={{ aspectRatio: '3/1', height: '120px' }}
+              >
+                {couplePreview ? (
+                  <img src={couplePreview} alt="커플 전신" className={styles.previewImg} />
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: 'var(--text-tertiary)' }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                    <span style={{ fontSize: '0.9rem' }}>자연스러운 체형 생성용 (배경 제한 없음)</span>
+                  </div>
+                )}
+                <input
+                  ref={coupleInputRef}
+                  type="file"
+                  accept="image/*"
+                  className={styles.fileInput}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handleFile(f, 'couple');
+                  }}
+                />
+              </label>
+              <span className={styles.uploadLabelText}>
+                {validating === 'couple' ? (
+                  <span className={styles.uploadValidating}>등록 중...</span>
+                ) : couplePreview ? (
+                  <span className={styles.uploadDone}>커플 사진 등록 완료</span>
+                ) : (
+                  '커플 전신 사진 (선택 사항)'
+                )}
+              </span>
+            </div>
+          </div>
+
           {/* 이미지 가이드 버튼 */}
-          <button className={styles.guideBtn} onClick={() => setShowGuide(true)}>
+          <button className={styles.guideBtn} onClick={() => setShowGuide(true)} style={{ marginTop: '2rem' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <circle cx="12" cy="12" r="10" />
               <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />

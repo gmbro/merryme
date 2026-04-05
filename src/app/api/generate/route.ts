@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     const referenceImages: { base64: string; mimeType: string }[] = [];
     const refUrls: Record<string, string> = {}; // for face swap
 
-    for (const type of ['her', 'him']) {
+    for (const type of ['her', 'him', 'couple']) {
       const { data: files } = await supabase.storage
         .from('merryme')
         .list(`uploads/${sessionId}/${type}`);
@@ -67,7 +67,9 @@ export async function POST(request: NextRequest) {
           .from('merryme')
           .getPublicUrl(`uploads/${sessionId}/${type}/${files[0].name}`);
 
-        refUrls[type] = urlData.publicUrl;
+        if (type !== 'couple') {
+          refUrls[type] = urlData.publicUrl;
+        }
 
         try {
           const img = await fetchImageAsBase64(urlData.publicUrl);
@@ -115,19 +117,23 @@ export async function POST(request: NextRequest) {
     }
 
     // Add text prompt with reference photo instruction
-    // Note: Face Swap API will replace faces post-generation, so focus on body accuracy
+    // Based on the number of images: 1st=Bride, 2nd=Groom, (optional) 3rd=Couple
+    const hasCouplePhoto = referenceImages.length >= 3;
+    const bodyInstruction = hasCouplePhoto
+      ? `1. BODY & CHEMISTRY: Use the 3RD reference photo (the couple photo) to determine the exact height difference, body proportions, body shapes, and romantic chemistry between the bride and groom. DONT substitute with default proportions.`
+      : `1. BODY: The bride is approximately 169cm tall. The groom is approximately 180cm tall. Match these proportions.`;
+
     const refInstruction = referenceImages.length > 0 
       ? `
 
 === CHARACTER CONSISTENCY INSTRUCTIONS ===
-The ${referenceImages.length} reference photo(s) above show the REAL people who must appear in the generated image.
-1. BODY: The bride is approximately 169cm tall. The groom is approximately 180cm tall. Match these proportions.
-2. SKIN: Match the exact skin tone and complexion from the reference photos.
+The reference photo(s) above show the REAL people who must appear in the generated image.
+${bodyInstruction}
+2. SKIN: Match the exact skin tone and complexion from the face reference photos.
 3. HAIR: Same hairstyle, hair color, hair length, hair texture.
-4. BODY TYPE: Same body type and build as the reference photos.
-5. GENDER: Do NOT change genders. First reference = bride (female), second reference = groom (male).
-6. FACE: Generate faces that closely resemble the reference photos. The faces should be clearly visible and well-lit.
-7. The people in the output image must look natural and proportionate.
+4. GENDER: First reference = bride (female), second reference = groom (male).
+5. FACE: Generate faces that closely resemble the 1ST and 2ND reference photos. The faces should be clearly visible and well-lit.
+6. The people in the output image must look natural and proportionate.
 === END CHARACTER INSTRUCTIONS ===`
       : '';
     contents.push({ text: prompt + refInstruction });

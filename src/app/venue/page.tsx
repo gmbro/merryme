@@ -2,6 +2,8 @@
 
 import { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { useSession } from '@/hooks/useSession';
+import { usePersistedState } from '@/hooks/usePersistedState';
 import StepIndicator from '@/components/layout/StepIndicator';
 import Footer from '@/components/layout/Footer';
 import styles from './page.module.css';
@@ -18,11 +20,11 @@ const VENUE_STYLES = [
 function VenueContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const sessionId = searchParams.get('session');
+  const { sessionId, getStepUrl } = useSession(searchParams.get('session'));
 
-  const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
+  const [selectedStyle, setSelectedStyle] = usePersistedState<string | null>(`merryme_venue_style_${sessionId}`, null);
   const [generating, setGenerating] = useState(false);
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = usePersistedState<string[]>(`merryme_venue_images_${sessionId}`, []);
   const [error, setError] = useState<string | null>(null);
   const [zoomImg, setZoomImg] = useState<string | null>(null);
 
@@ -139,7 +141,7 @@ function VenueContent() {
             ))}
           </div>
           <div className={styles.nextSection}>
-            <button className="btn btn-primary btn-large" onClick={() => router.push(`/honeymoon?session=${sessionId}`)} style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }} disabled={images.length < 2}>
+            <button className="btn btn-primary btn-large" onClick={() => router.push(getStepUrl('honeymoon'))} style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }} disabled={images.length < 2}>
               다음: 신혼여행 시뮬레이션
             </button>
             <button className="btn btn-secondary" onClick={() => { setSelectedStyle(null); setImages([]); }} disabled={generating} style={{ whiteSpace: 'nowrap' }}>
