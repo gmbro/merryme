@@ -38,7 +38,7 @@
   /* Gradients */
   --gradient-gold: linear-gradient(135deg, #D4A574 0%, #F0D8C0 50%, #D4A574 100%);
   --gradient-rose: linear-gradient(135deg, #F5A0B8 0%, #FFC8D8 100%);
-  --gradient-hero: linear-gradient(180deg, #FFFCF9 0%, #FFF5F0 35%, #FFEEE6 70%, #FFE5D8 100%);
+  --gradient-hero: linear-gradient(180deg, #fff5f0 0%, #fce4ec 50%, #fff0f5 100%);
   --gradient-dark: linear-gradient(180deg, #1A1A2E 0%, #16213E 100%);
   --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.08) 100%);
 
