@@ -105,50 +105,48 @@ function SnapshotsContent() {
     setGenerating(true);
     setError(null);
     setProgress(0);
+    setImages([]);
 
     const newImages: string[] = [];
-    const total = selectedThemes.length;
+    const ANGLES = 4;
+    const totalImages = selectedThemes.length * ANGLES;
 
-    for (let i = 0; i < total; i++) {
-      setProgress(Math.round(((i) / total) * 100));
-      
-      // Delay between requests to avoid rate limiting
-      if (i > 0) {
-        await new Promise(r => setTimeout(r, 3000));
-      }
-      
-      try {
-        const res = await fetch('/api/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sessionId,
-            step: 'snapshot',
-            options: { theme: selectedThemes[i] },
-          }),
-        });
+    for (let i = 0; i < selectedThemes.length; i++) {
+      for (let angle = 0; angle < ANGLES; angle++) {
+        const currentIdx = i * ANGLES + angle;
+        setProgress(Math.round((currentIdx / totalImages) * 100));
+        
+        // Delay between requests to avoid rate limiting
+        if (currentIdx > 0) {
+          await new Promise(r => setTimeout(r, 2000));
+        }
+        
+        try {
+          const res = await fetch('/api/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sessionId,
+              step: 'snapshot',
+              options: { theme: selectedThemes[i], angleIndex: angle },
+            }),
+          });
 
-        const data = await res.json();
-        if (!res.ok) {
-          console.error(`Theme ${selectedThemes[i]} error:`, data);
-          // Show specific error to user
-          if (data.error) {
-            setError(data.error);
+          const data = await res.json();
+          if (!res.ok) {
+            if (data.error) setError(data.error);
+            continue;
           }
-          continue; // skip failed, continue with others
-        }
 
-        if (data.images && data.images.length > 0) {
-          newImages.push(...data.images);
-          setImages((prev) => [...prev, ...data.images]);
-        } else if (data.error) {
-          console.error(`Theme ${selectedThemes[i]}: ${data.error}`);
-          setError(data.error);
-        }
-      } catch (err) {
-        console.error(`Generate error for theme ${selectedThemes[i]}:`, err);
-        if (err instanceof TypeError && err.message === 'Failed to fetch') {
-          setError('서버에 연결할 수 없어요. 인터넷 연결을 확인해주세요.');
+          if (data.images && data.images.length > 0) {
+            newImages.push(...data.images);
+            setImages((prev) => [...prev, ...data.images]);
+          }
+        } catch (err) {
+          console.error(`Generate error angle ${angle}:`, err);
+          if (err instanceof TypeError && err.message === 'Failed to fetch') {
+            setError('서버에 연결할 수 없어요.');
+          }
         }
       }
     }
@@ -157,8 +155,6 @@ function SnapshotsContent() {
 
     if (newImages.length === 0 && !error) {
       setError('이미지 생성에 실패했어요. 다른 테마로 다시 시도해주세요.');
-    } else if (newImages.length > 0 && newImages.length < total) {
-      setError(`${newImages.length}/${total}장만 생성되었어요. 일부 테마에서 오류가 있었습니다.`);
     }
     setGenerating(false);
   };
@@ -236,7 +232,7 @@ function SnapshotsContent() {
               생성 중... {progress}%
             </>
           ) : (
-            `스냅사진 생성하기 (${selectedThemes.length}장)`
+            `스냅사진 생성하기 (${selectedThemes.length * 4}장)`
           )}
         </button>
         {generating && (

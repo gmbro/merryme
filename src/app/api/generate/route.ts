@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     let prompt = '';
     switch (step) {
       case 'snapshot':
-        prompt = buildSnapshotPrompt(options.theme || 'cherry_blossom');
+        prompt = buildSnapshotPrompt(options.theme || 'cherry_blossom', options.angleIndex || 0);
         break;
       case 'styling':
         prompt = buildStylingPrompt(
@@ -110,9 +110,19 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Add text prompt with reference photo instruction
+    // Add text prompt with STRONG reference photo instruction
     const refInstruction = referenceImages.length > 0 
-      ? `\nIMPORTANT: The generated image MUST feature the EXACT same people shown in the ${referenceImages.length} reference photo(s) above. Match their faces, hairstyles, skin tones, and body types precisely. Do NOT change their gender or appearance. If both reference photos show males, generate two males. If both show females, generate two females.`
+      ? `
+
+=== CRITICAL CHARACTER CONSISTENCY INSTRUCTIONS ===
+The ${referenceImages.length} reference photo(s) above show the REAL people who must appear in the generated image.
+1. FACE: Copy the EXACT face shape, eye shape, nose, lips, jawline, eyebrows from the reference photos. The faces must be recognizable as the SAME people.
+2. SKIN: Match the exact skin tone and complexion.
+3. HAIR: Same hairstyle, hair color, hair length, hair texture.
+4. BODY: Same body type, height proportion, build.
+5. GENDER: Do NOT change genders. If reference shows two males, generate two males. If two females, generate two females.
+6. The people in the output image must look like they could be the SAME INDIVIDUALS photographed on a different day, NOT different people.
+=== END CHARACTER INSTRUCTIONS ===`
       : '';
     contents.push({ text: prompt + refInstruction });
 

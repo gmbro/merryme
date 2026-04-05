@@ -217,8 +217,8 @@
 
 .gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: var(--space-md);
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
   margin-bottom: var(--space-2xl);
 }
 

@@ -49,24 +49,30 @@ function HoneymoonContent() {
     if (!canGenerate) return;
     setGenerating(true);
     setError(null);
+    setImages([]);
 
     try {
-      for (const scene of effectiveScenes) {
-        const res = await fetch('/api/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sessionId,
-            step: 'honeymoon',
-            options: { destination: effectiveName, scene },
-          }),
-        });
+      // Generate 4 images with different angles for the first scene
+      const scene = effectiveScenes[0] || `${effectiveName}의 아름다운 풍경`;
+      for (let angle = 0; angle < 4; angle++) {
+        if (angle > 0) await new Promise(r => setTimeout(r, 2000));
+        try {
+          const res = await fetch('/api/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sessionId,
+              step: 'honeymoon',
+              options: { destination: effectiveName, scene, angleIndex: angle },
+            }),
+          });
 
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || '이미지 생성 실패');
-
-        if (data.images.length > 0) {
-          setImages((prev) => [...prev, { url: data.images[0], scene }]);
+          const data = await res.json();
+          if (res.ok && data.images?.length > 0) {
+            setImages((prev) => [...prev, { url: data.images[0], scene }]);
+          }
+        } catch {
+          // continue
         }
       }
     } catch (err) {

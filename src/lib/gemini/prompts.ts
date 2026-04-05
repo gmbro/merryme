@@ -31,15 +31,23 @@ const SNAPSHOT_THEMES: Record<SnapshotTheme, string> = {
   hanok_traditional: '전통 한옥 대청마루와 기와지붕, 한복을 입고 단아한 자세, 고즈넉한 한국 전통 분위기',
 };
 
-export function buildSnapshotPrompt(theme: SnapshotTheme): string {
+export function buildSnapshotPrompt(theme: SnapshotTheme, angleIndex: number = 0): string {
+  const angles = [
+    'Full body shot from front, the couple standing together facing the camera, natural pose with arms linked',
+    'Medium close-up from 45-degree angle, the couple looking at each other lovingly, foreheads nearly touching',
+    'Wide shot from behind showing the couple walking hand-in-hand toward the scenic background, romantic silhouette',
+    'Close-up portrait from slightly below, the couple laughing naturally, candid moment, beautiful bokeh background',
+  ];
+  const angle = angles[angleIndex % angles.length];
+
   return `
 Create an ultra-realistic pre-wedding couple photograph.
 Scene: ${SNAPSHOT_THEMES[theme]}
-The couple is posing naturally and lovingly — genuine smiles, natural body language, holding hands or looking at each other with real emotion.
-Composition: Medium-to-full body shot, 4:3 aspect ratio, professional wedding photography composition with rule of thirds.
+Camera angle: ${angle}.
 Lighting: Natural light with subtle fill, realistic shadows, skin catch lights in eyes.
+ABSOLUTE REQUIREMENT: The two people in this photo must be IDENTICAL to the reference photos provided. Copy their exact face shape, eyes, nose, mouth, skin color, hairstyle, body build. Do NOT substitute with different-looking people.
 ${STYLE_PREFIX}
-Generate one stunning, photorealistic image that is indistinguishable from a real professional wedding photograph.
+Generate one stunning, photorealistic image indistinguishable from a real professional wedding photograph.
 `.trim();
 }
 
