@@ -23,31 +23,31 @@ const THEMES = [
     id: 'classic_studio' as const,
     name: '클래식 스튜디오',
     desc: '부드러운 스튜디오 조명',
-    preview: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=300&fit=crop',
+    preview: 'https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=400&h=300&fit=crop',
   },
   {
     id: 'forest_garden' as const,
     name: '숲속 가든',
     desc: '초록 자연 속에서',
-    preview: 'https://images.unsplash.com/photo-1510076857177-7470076d4098?w=400&h=300&fit=crop',
+    preview: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop',
   },
   {
     id: 'city_night' as const,
     name: '도심 야경',
     desc: '시네마틱 도시 야경',
-    preview: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=400&h=300&fit=crop',
+    preview: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=400&h=300&fit=crop',
   },
   {
     id: 'autumn_park' as const,
     name: '가을 단풍',
     desc: '붉은 단풍 공원에서',
-    preview: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=300&fit=crop',
+    preview: 'https://images.unsplash.com/photo-1508193638397-1c4234db14d8?w=400&h=300&fit=crop',
   },
   {
     id: 'snowy_winter' as const,
     name: '겨울 눈꽃',
     desc: '로맨틱한 눈 속에서',
-    preview: 'https://images.unsplash.com/photo-1491002052546-bf38f186af56?w=400&h=300&fit=crop',
+    preview: 'https://images.unsplash.com/photo-1457269449834-928af64c684d?w=400&h=300&fit=crop',
   },
   {
     id: 'lavender_field' as const,
@@ -59,13 +59,13 @@ const THEMES = [
     id: 'rooftop_garden' as const,
     name: '루프탑 가든',
     desc: '도심 속 루프탑에서',
-    preview: 'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop',
+    preview: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400&h=300&fit=crop',
   },
   {
     id: 'hanok_traditional' as const,
     name: '전통 한옥',
     desc: '고즈넉한 한옥에서',
-    preview: 'https://images.unsplash.com/photo-1583169803882-c42da85f4b3e?w=400&h=300&fit=crop',
+    preview: 'https://images.unsplash.com/photo-1578469645742-46cae010e5d6?w=400&h=300&fit=crop',
   },
 ];
 
@@ -128,6 +128,12 @@ function SnapshotsContent() {
 
     for (let i = 0; i < total; i++) {
       setProgress(Math.round(((i) / total) * 100));
+      
+      // Delay between requests to avoid rate limiting
+      if (i > 0) {
+        await new Promise(r => setTimeout(r, 3000));
+      }
+      
       try {
         const res = await fetch('/api/generate', {
           method: 'POST',

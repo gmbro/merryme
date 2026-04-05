@@ -111,39 +111,59 @@ export async function POST(request: NextRequest) {
     // Add text prompt
     contents.push({ text: prompt });
 
-    // Call Gemini API
+    // Call Gemini API with retry for rate limiting
     let response;
-    try {
-      response = await genAI.models.generateContent({
-        model: GEMINI_MODEL,
-        contents: [{ role: 'user', parts: contents }],
-        config: {
-          responseModalities: ['TEXT', 'IMAGE'],
-        },
-      });
-    } catch (apiError) {
-      const errMsg = apiError instanceof Error ? apiError.message : String(apiError);
-      console.error('Gemini API call error:', errMsg);
-      
-      if (errMsg.includes('SAFETY') || errMsg.includes('safety')) {
-        return NextResponse.json(
-          { error: 'AI 안전 정책에 의해 이미지를 생성할 수 없었어요. 다른 테마를 선택해 보세요.' },
-          { status: 400 }
-        );
+    const MAX_RETRIES = 3;
+    
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      try {
+        response = await genAI.models.generateContent({
+          model: GEMINI_MODEL,
+          contents: [{ role: 'user', parts: contents }],
+          config: {
+            responseModalities: ['TEXT', 'IMAGE'],
+          },
+        });
+        break; // success
+      } catch (apiError) {
+        const errMsg = apiError instanceof Error ? apiError.message : String(apiError);
+        console.error(`Gemini API attempt ${attempt + 1}/${MAX_RETRIES}:`, errMsg);
+        
+        // Rate limit — retry with backoff
+        if (errMsg.includes('429') || errMsg.includes('RATE') || errMsg.includes('quota') || errMsg.includes('RESOURCE_EXHAUSTED')) {
+          if (attempt < MAX_RETRIES - 1) {
+            const delay = Math.pow(2, attempt + 1) * 1000; // 2s, 4s, 8s
+            console.log(`Rate limited, waiting ${delay}ms before retry...`);
+            await new Promise(r => setTimeout(r, delay));
+            continue;
+          }
+          return NextResponse.json(
+            { error: 'API 요청이 많아요. 30초 후 다시 시도해주세요.' },
+            { status: 429 }
+          );
+        }
+        
+        if (errMsg.includes('SAFETY') || errMsg.includes('safety')) {
+          return NextResponse.json(
+            { error: 'AI 안전 정책에 의해 이미지를 생성할 수 없었어요. 다른 테마를 선택해 보세요.' },
+            { status: 400 }
+          );
+        }
+        if (errMsg.includes('not found') || errMsg.includes('404')) {
+          return NextResponse.json(
+            { error: 'AI 모델을 찾을 수 없어요. 관리자에게 문의해주세요.' },
+            { status: 500 }
+          );
+        }
+        throw apiError;
       }
-      if (errMsg.includes('quota') || errMsg.includes('429') || errMsg.includes('RATE')) {
-        return NextResponse.json(
-          { error: 'API 요청 한도를 초과했어요. 잠시 후 다시 시도해주세요.' },
-          { status: 429 }
-        );
-      }
-      if (errMsg.includes('not found') || errMsg.includes('404')) {
-        return NextResponse.json(
-          { error: 'AI 모델을 찾을 수 없어요. 관리자에게 문의해주세요.' },
-          { status: 500 }
-        );
-      }
-      throw apiError;
+    }
+
+    if (!response) {
+      return NextResponse.json(
+        { error: '이미지 생성에 실패했어요. 다시 시도해주세요.' },
+        { status: 500 }
+      );
     }
 
     // Extract generated images
