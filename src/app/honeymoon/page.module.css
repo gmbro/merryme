@@ -58,10 +58,10 @@
   box-shadow: var(--shadow-gold) !important;
 }
 
-.destEmoji {
-  font-size: 3rem;
+.destEmoji, .destFlag {
+  font-size: 2.2rem;
   display: block;
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--space-sm);
 }
 
 .destName {

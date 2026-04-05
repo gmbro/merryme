@@ -460,14 +460,6 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
                     ? '영상 다운로드 (1080p)'
                     : '영상 다운로드 ($1)'}
               </button>
-              <button
-                className="btn btn-secondary btn-large"
-                onClick={() => user ? handleDownloadZip() : setShowLoginModal(true)}
-                disabled={downloading}
-                style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }}
-              >
-                {downloading ? '다운로드 중...' : user ? '사진 다운로드' : '사진 다운로드 (로그인 필요)'}
-              </button>
               <a href="/" className="btn btn-ghost" style={{ whiteSpace: 'nowrap' }}>
                 처음으로 돌아가기
               </a>

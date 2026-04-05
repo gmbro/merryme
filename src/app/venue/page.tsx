@@ -7,12 +7,12 @@ import Footer from '@/components/layout/Footer';
 import styles from './page.module.css';
 
 const VENUE_STYLES = [
-  { id: 'garden', name: '정원 웨딩', style: 'Elegant outdoor garden wedding with lush greenery, flower arches, and natural sunlight', preview: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400&h=300&fit=crop' },
-  { id: 'hotel', name: '호텔 웨딩', style: 'Luxurious hotel ballroom wedding with crystal chandeliers, elegant draping, and warm golden lighting', preview: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400&h=300&fit=crop' },
-  { id: 'beach', name: '해변 웨딩', style: 'Romantic beach wedding ceremony with ocean backdrop, white fabric canopy, sunset golden hour', preview: 'https://images.unsplash.com/photo-1545232979-8bf68ee9b1af?w=400&h=300&fit=crop' },
-  { id: 'rooftop', name: '루프탑 웨딩', style: 'Modern rooftop wedding with city skyline backdrop, string lights, minimalist elegant decor', preview: 'https://images.unsplash.com/photo-1470076892663-af684e5e15af?w=400&h=300&fit=crop' },
-  { id: 'hanok', name: '한옥 웨딩', style: 'Traditional Korean hanok wedding with wooden architecture, paper lanterns, courtyard ceremony in hanbok', preview: 'https://images.unsplash.com/photo-1548115184-bc6544d06a58?w=400&h=300&fit=crop' },
-  { id: 'cathedral', name: '성당 웨딩', style: 'Grand cathedral wedding with stained glass windows, high vaulted ceilings, dramatic organ pipes, candlelight', preview: 'https://images.unsplash.com/photo-1543489822-c49534f3271f?w=400&h=300&fit=crop' },
+  { id: 'garden', name: '가든 웨딩', emoji: '🌷' },
+  { id: 'hotel', name: '호텔 웨딩', emoji: '🏨' },
+  { id: 'beach', name: '비치 웨딩', emoji: '🏖️' },
+  { id: 'rooftop', name: '루프탑 웨딩', emoji: '🌃' },
+  { id: 'hanok', name: '한옥 웨딩', emoji: '🏯' },
+  { id: 'cathedral', name: '성당 웨딩', emoji: '⛪' },
 ];
 
 function VenueContent() {
@@ -35,10 +35,10 @@ function VenueContent() {
     );
   }
 
-  const venueData = VENUE_STYLES.find((v) => v.id === selectedStyle);
+  const styleName = VENUE_STYLES.find(s => s.id === selectedStyle)?.name || '';
 
   const handleGenerate = async () => {
-    if (!venueData) return;
+    if (!selectedStyle) return;
     setGenerating(true);
     setError(null);
     setImages([]);
@@ -48,7 +48,7 @@ function VenueContent() {
         fetch('/api/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId, step: 'venue', options: { venueStyle: venueData.style, angleIndex: angle } }),
+          body: JSON.stringify({ sessionId, step: 'venue', options: { venueStyle: styleName, angleIndex: angle } }),
         })
           .then(r => r.json())
           .then(data => {
@@ -92,58 +92,56 @@ function VenueContent() {
       </button>
       <StepIndicator currentStep={2} />
 
-      <div className={styles.headerSection}>
-        <h1>가상 결혼식장</h1>
-        <p className={styles.subtitle}>원하는 웨딩 스타일을 선택해주세요</p>
-      </div>
+      {/* Selection View */}
+      {images.length === 0 && (
+        <>
+          <div className={styles.headerSection}>
+            <h1>가상 예식장</h1>
+            <p className={styles.subtitle}>원하는 예식장 스타일을 선택해주세요</p>
+          </div>
 
-      {/* Style Cards */}
-      <section className={styles.themeSection}>
-        <div className={styles.themeGrid}>
-          {VENUE_STYLES.map((v) => (
-            <button
-              key={v.id}
-              className={`${styles.themeCard} ${selectedStyle === v.id ? styles.themeCardSelected : ''}`}
-              onClick={() => setSelectedStyle(v.id)}
-              disabled={generating}
-            >
-              <div className={styles.themeImgWrap}>
-                <img src={v.preview} alt={v.name} className={styles.themeImg} />
-                {selectedStyle === v.id && (
-                  <div className={styles.themeCheck}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
-                  </div>
-                )}
-              </div>
-              <span className={styles.themeName}>{v.name}</span>
+          <section className={styles.destSection}>
+            <div className={styles.destGrid}>
+              {VENUE_STYLES.map((style) => (
+                <button
+                  key={style.id}
+                  className={`${styles.destCard} ${selectedStyle === style.id ? styles.destSelected : ''}`}
+                  onClick={() => setSelectedStyle(style.id)}
+                  disabled={generating}
+                >
+                  <span className={styles.destFlag}>{style.emoji}</span>
+                  <span className={styles.destName}>{style.name}</span>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <div className={styles.generateSection}>
+            <button className="btn btn-primary btn-large" onClick={handleGenerate} disabled={!selectedStyle || generating} style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }}>
+              {generating ? '촬영 중...' : '예식장 사진 생성'}
             </button>
-          ))}
-        </div>
-      </section>
+            {error && <p className={styles.errorMsg}>{error}</p>}
+          </div>
+        </>
+      )}
 
-      {/* Generate */}
-      <div className={styles.generateSection}>
-        <button className="btn btn-primary btn-large" onClick={handleGenerate} disabled={!selectedStyle || generating} style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }}>
-          {generating ? '촬영 중...' : '결혼식 시뮬레이션 시작'}
-        </button>
-        {error && <p className={styles.errorMsg}>{error}</p>}
-      </div>
-
-      {/* Generated Images */}
+      {/* Results View */}
       {images.length > 0 && (
         <section className={styles.gallerySection}>
-          <h3 className={styles.sectionTitle}>가상 결혼식 장면 <span className={styles.countBadge}>{images.length}장</span></h3>
+          <h3 className={styles.sectionTitle}>
+            {styleName} <span className={styles.countBadge}>{images.length}장</span>
+          </h3>
           <div className={styles.gallery}>
             {images.map((url, i) => (
               <div key={i} className={styles.imageCard} onClick={() => setZoomImg(url)} style={{ cursor: 'pointer' }}>
-                <img src={url} alt={`결혼식 ${i + 1}`} className={styles.generatedImage} />
+                <img src={url} alt={`예식장 ${i + 1}`} className={styles.generatedImage} />
                 <div className={styles.zoomHint}>확대</div>
               </div>
             ))}
           </div>
           <div className={styles.nextSection}>
             <button className="btn btn-primary btn-large" onClick={() => router.push(`/honeymoon?session=${sessionId}`)} style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }} disabled={images.length < 4}>
-              다음: 신혼여행
+              다음: 신혼여행 시뮬레이션
             </button>
             <button className="btn btn-secondary" onClick={() => { setSelectedStyle(null); setImages([]); }} disabled={generating} style={{ whiteSpace: 'nowrap' }}>
               다른 스타일로 다시 생성
