@@ -23,7 +23,7 @@ const THEMES = [
     id: 'classic_studio' as const,
     name: '클래식 스튜디오',
     desc: '부드러운 스튜디오 조명',
-    preview: 'https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=400&h=300&fit=crop',
+    preview: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400&h=300&fit=crop',
   },
   {
     id: 'forest_garden' as const,
@@ -35,7 +35,7 @@ const THEMES = [
     id: 'city_night' as const,
     name: '도심 야경',
     desc: '시네마틱 도시 야경',
-    preview: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=400&h=300&fit=crop',
+    preview: 'https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?w=400&h=300&fit=crop',
   },
   {
     id: 'autumn_park' as const,
