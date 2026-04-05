@@ -106,7 +106,7 @@ async function compressImage(file: File, maxSize = 1200): Promise<File> {
   });
 }
 
-async function validateFaceServer(file: File, type: 'her' | 'him'): Promise<{ valid: boolean; reason?: string }> {
+async function validateFaceServer(file: File, type: 'her' | 'him'): Promise<{ valid: boolean; reason?: string; warning?: string }> {
   try {
     // 업로드 전 이미지 압축
     const compressed = await compressImage(file);
@@ -230,6 +230,10 @@ export default function LandingPage() {
       if (type === 'her' && herInputRef.current) herInputRef.current.value = '';
       if (type === 'him' && himInputRef.current) himInputRef.current.value = '';
       return;
+    }
+    // 검증 통과했지만 경고가 있는 경우 (검증 서비스 일시 오류)
+    if (result.warning) {
+      setError(result.warning);
     }
 
     const reader = new FileReader();
