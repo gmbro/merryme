@@ -130,7 +130,7 @@ function HoneymoonContent() {
           onClick={handleGenerate}
           disabled={!canGenerate || generating}
         >
-          {generating ? '✈️ 신혼여행 추억을 만들고 있어요...' : '🌴 신혼여행 갤러리 생성'}
+          {generating ? '📷 사진작가가 멋지게 촬영 중이에요...' : '🌴 신혼여행 갤러리 생성'}
         </button>
         {generating && (
           <p className={styles.progressHint}>

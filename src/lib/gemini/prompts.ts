@@ -33,10 +33,10 @@ const SNAPSHOT_THEMES: Record<SnapshotTheme, string> = {
 
 export function buildSnapshotPrompt(theme: SnapshotTheme, angleIndex: number = 0): string {
   const angles = [
-    'Full body shot from front, the couple standing together facing the camera, natural pose with arms linked',
-    'Medium close-up from 45-degree angle, the couple looking at each other lovingly, foreheads nearly touching',
-    'Wide shot from behind showing the couple walking hand-in-hand toward the scenic background, romantic silhouette',
-    'Close-up portrait from slightly below, the couple laughing naturally, candid moment, beautiful bokeh background',
+    'Full body shot from front, the couple facing camera with natural smiles, one person\'s arm around the other\'s waist, relaxed and genuine pose',
+    'Medium shot of one person giving the other a piggyback ride, both laughing joyfully, candid and playful moment',
+    'Close-up of the couple touching foreheads gently, eyes closed, tender romantic moment, shallow depth of field bokeh',
+    'Wide shot of the couple twirling/dancing together, dress flowing in the breeze, dynamic and joyful movement captured mid-spin',
   ];
   const angle = angles[angleIndex % angles.length];
 
@@ -101,10 +101,10 @@ ${STYLE_PREFIX}
 
 export function buildVenuePrompt(venueStyle: string, angleIndex: number = 0): string {
   const angles = [
-    'Wide establishing shot from the back of the aisle, showing the full venue and the couple standing before the officiant at the altar',
-    'Medium shot from the side, showing the couple facing each other at the altar with the officiant behind them, exchanging vows',
-    'Close-up shot of the couple from slightly behind, looking at each other with warm emotion, officiant slightly blurred in background',
-    'Three-quarter angle shot showing the couple, guests in seats, flower decorations, capturing the full ceremony atmosphere',
+    'Wide cinematic shot of the couple walking down the aisle together, guests standing on both sides watching and smiling, flower petals in the air, bridal entrance moment',
+    'Medium shot of the couple standing before the officiant at the altar exchanging wedding vows, hands held together, emotional and heartfelt moment',
+    'The couple performing a traditional bow ceremony (맞절) facing each other at the altar, respectful and solemn, guests watching in the background',
+    'Joyful exit scene — the couple walking back up the aisle together after the ceremony, huge smiles, guests clapping and waving, confetti or petals flying',
   ];
   const angle = angles[angleIndex % angles.length];
 
@@ -121,10 +121,10 @@ Generate one stunning, photorealistic wedding ceremony photograph.
 
 export function buildHoneymoonPrompt(destination: string, scene: string, angleIndex: number = 0): string {
   const angles = [
-    'Wide establishing shot showing the couple and the scenic destination background',
-    'Medium shot of the couple walking together, candid and relaxed',
-    'Close-up portrait of the couple smiling at the camera with the destination behind them',
-    'Over-the-shoulder shot from behind the couple, looking out at the beautiful scenery',
+    'Wide shot of the couple in matching casual summer outfits (linen shirts, sundress), posing at a famous landmark, happy tourist pose with the scenic background',
+    'Medium shot of the couple in smart-casual evening wear, enjoying a romantic candlelit dinner at an outdoor restaurant, warm ambient lighting, holding wine glasses',
+    'Candid lifestyle shot of the couple in sporty/adventure outfits (light jackets, sneakers), walking hand-in-hand on a scenic trail or beach, wind in their hair, natural laughter',
+    'Close-up romantic portrait of the couple in elegant resort wear, sitting together at a scenic viewpoint during golden hour sunset, heads leaning toward each other',
   ];
   const angle = angles[angleIndex % angles.length];
 

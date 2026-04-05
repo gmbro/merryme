@@ -184,7 +184,7 @@ function VenueContent() {
               onClick={handleGenerate}
               disabled={!selectedStyle || generating}
             >
-              {generating ? '✨ AI가 결혼식을 준비하고 있어요...' : '💒 결혼식 시뮬레이션 시작'}
+              {generating ? '📷 사진작가가 멋지게 촬영 중이에요...' : '💒 결혼식 시뮬레이션 시작'}
             </button>
             {error && <p className={styles.errorMsg}>⚠️ {error}</p>}
           </div>

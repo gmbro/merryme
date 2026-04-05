@@ -377,7 +377,7 @@ export default function LandingPage() {
                 ) : herPreview ? (
                   <span className={styles.uploadDone}>업로드 완료</span>
                 ) : (
-                  '신부 사진 올리기'
+                  '예비신부 단독사진'
                 )}
               </span>
             </div>
@@ -415,7 +415,7 @@ export default function LandingPage() {
                 ) : himPreview ? (
                   <span className={styles.uploadDone}>업로드 완료</span>
                 ) : (
-                  '신랑 사진 올리기'
+                  '예비신랑 단독사진'
                 )}
               </span>
             </div>

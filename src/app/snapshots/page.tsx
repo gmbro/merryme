@@ -229,7 +229,7 @@ function SnapshotsContent() {
           {generating ? (
             <>
               <span className="loader-ring" style={{ width: 18, height: 18, borderWidth: 2 }} />
-              생성 중... {progress}%
+              📷 사진작가가 멋지게 촬영 중이에요... {progress}%
             </>
           ) : (
             `스냅사진 생성하기 (${selectedThemes.length * 4}장)`

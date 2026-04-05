@@ -10,17 +10,18 @@ export default function Petals() {
     const container = containerRef.current;
     if (!container) return;
 
-    const petalCount = 35;
+    const petalCount = 18;
+    const colors = ['petal', 'petal petal-deep', 'petal petal-red'];
     const petals: HTMLDivElement[] = [];
 
     for (let i = 0; i < petalCount; i++) {
       const petal = document.createElement('div');
-      petal.className = 'petal';
+      petal.className = colors[i % colors.length];
       petal.style.left = `${Math.random() * 100}%`;
       petal.style.animationDuration = `${6 + Math.random() * 8}s`;
       petal.style.animationDelay = `${Math.random() * 8}s`;
       petal.style.transform = `scale(${0.5 + Math.random() * 1.0})`;
-      petal.style.opacity = `${0.4 + Math.random() * 0.6}`;
+      petal.style.opacity = `${0.5 + Math.random() * 0.5}`;
       container.appendChild(petal);
       petals.push(petal);
     }

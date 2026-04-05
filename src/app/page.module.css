@@ -444,10 +444,11 @@
    Footer
    =========================== */
 .footer {
-  background: var(--color-bg-dark);
-  color: var(--color-text-white);
+  background: linear-gradient(135deg, #fff5f0, #fce4ec, #fff0f5);
+  color: var(--color-text-primary);
   padding: var(--space-2xl) 0;
   text-align: center;
+  border-top: 1px solid rgba(212, 165, 116, 0.15);
 }
 
 .footerBrand {
@@ -455,24 +456,24 @@
   font-size: 1.1rem;
   font-weight: 700;
   margin-bottom: var(--space-sm);
-  color: var(--color-primary-light);
+  color: var(--color-primary);
 }
 
 .footerCopy {
   font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-text-secondary);
   margin-bottom: var(--space-xs);
 }
 
 .footerNote {
   font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--color-text-muted);
   margin-bottom: var(--space-md);
 }
 
 .footerCompany {
   font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--color-text-secondary);
   margin-bottom: var(--space-xs);
 }
 
@@ -485,18 +486,18 @@
 
 .footerLink {
   font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--color-text-secondary);
   text-decoration: none;
   transition: color var(--transition-fast);
 }
 
 .footerLink:hover {
-  color: var(--color-primary-light);
+  color: var(--color-primary);
   text-decoration: underline;
 }
 
 .footerDivider {
-  color: rgba(255, 255, 255, 0.2);
+  color: var(--color-text-muted);
   font-size: 0.7rem;
 }
 

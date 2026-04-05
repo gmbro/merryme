@@ -419,21 +419,28 @@ h4 { font-size: 1.15rem; }
   box-shadow: 0 0 4px rgba(255, 183, 197, 0.3);
 }
 
+.petal.petal-deep {
+  background: #E91E63;
+  box-shadow: 0 0 6px rgba(233, 30, 99, 0.4);
+}
+
+.petal.petal-red {
+  background: #D32F2F;
+  box-shadow: 0 0 6px rgba(211, 47, 47, 0.3);
+}
+
 .petal:nth-child(odd) {
-  background: #FFCDD8;
   width: 9px;
   height: 9px;
 }
 
 .petal:nth-child(3n) {
-  background: #FFA8BE;
   width: 14px;
   height: 14px;
   opacity: 0.9;
 }
 
 .petal:nth-child(4n+1) {
-  background: #FFD4E0;
   width: 7px;
   height: 7px;
 }
