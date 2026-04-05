@@ -69,16 +69,72 @@ const JOURNEY_STEPS = [
 ];
 
 /* ─── 서버 얼굴 검증 (Gemini API) ─── */
+/* ─── 이미지 압축 (413 방지) ─── */
+async function compressImage(file: File, maxSize = 1200): Promise<File> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let { width, height } = img;
+      if (width > maxSize || height > maxSize) {
+        if (width > height) {
+          height = Math.round((height * maxSize) / width);
+          width = maxSize;
+        } else {
+          width = Math.round((width * maxSize) / height);
+          height = maxSize;
+        }
+      }
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+          } else {
+            resolve(file);
+          }
+        },
+        'image/jpeg',
+        0.85
+      );
+    };
+    img.onerror = () => resolve(file);
+    img.src = URL.createObjectURL(file);
+  });
+}
+
 async function validateFaceServer(file: File, type: 'her' | 'him'): Promise<{ valid: boolean; reason?: string }> {
   try {
+    // 업로드 전 이미지 압축
+    const compressed = await compressImage(file);
+    
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', compressed);
     formData.append('type', type);
     const res = await fetch('/api/validate-face', { method: 'POST', body: formData });
+    
+    // 구체적인 에러 메시지
+    if (res.status === 413) {
+      return { valid: false, reason: '사진 용량이 너무 커요. 더 작은 사진을 올려주세요. (최대 4MB)' };
+    }
+    if (res.status === 429) {
+      return { valid: false, reason: 'API 요청이 많아요. 10초 후 다시 시도해주세요.' };
+    }
+    if (!res.ok) {
+      return { valid: false, reason: `서버 오류가 발생했어요. (${res.status}) 잠시 후 다시 시도해주세요.` };
+    }
+    
     const data = await res.json();
     return data;
-  } catch {
-    return { valid: false, reason: '사진 검증에 실패했어요. 다시 시도해주세요.' };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : '';
+    if (msg.includes('Failed to fetch')) {
+      return { valid: false, reason: '네트워크 연결을 확인해주세요.' };
+    }
+    return { valid: false, reason: '사진 검증 중 오류가 발생했어요. 다시 시도해주세요.' };
   }
 }
 

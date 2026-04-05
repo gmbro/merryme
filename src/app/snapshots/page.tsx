@@ -32,12 +32,6 @@ const THEMES = [
     preview: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=300&fit=crop',
   },
   {
-    id: 'city_night' as const,
-    name: '도심 야경',
-    desc: '시네마틱 도시 야경',
-    preview: 'https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?w=400&h=300&fit=crop',
-  },
-  {
     id: 'autumn_park' as const,
     name: '가을 단풍',
     desc: '붉은 단풍 공원에서',
@@ -48,18 +42,6 @@ const THEMES = [
     name: '겨울 눈꽃',
     desc: '로맨틱한 눈 속에서',
     preview: 'https://images.unsplash.com/photo-1457269449834-928af64c684d?w=400&h=300&fit=crop',
-  },
-  {
-    id: 'lavender_field' as const,
-    name: '라벤더 밭',
-    desc: '보라빛 꽃밭에서',
-    preview: 'https://images.unsplash.com/photo-1499002238440-d264edd596ec?w=400&h=300&fit=crop',
-  },
-  {
-    id: 'rooftop_garden' as const,
-    name: '루프탑 가든',
-    desc: '도심 속 루프탑에서',
-    preview: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400&h=300&fit=crop',
   },
   {
     id: 'hanok_traditional' as const,

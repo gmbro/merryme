@@ -1,13 +1,15 @@
 /**
  * MerryMe 프롬프트 템플릿
- * NanoBanana2 스타일: 따뜻하고 부드러운 필름 톤, 몽환적 빛 번짐
+ * Ultra-realistic photographic style with NanoBanana2 warm tones
  */
 
 const STYLE_PREFIX = `
-Maintain the exact facial features, skin tone, body proportions and unique characteristics 
-from the reference images. NanoBanana2 style: warm film tones, soft golden hour lighting, 
-gentle bokeh background, dreamy light leaks, natural happy expressions, 
-high-quality film camera texture.
+CRITICAL: Generate an ultra-realistic photograph that looks like it was taken with a professional DSLR camera (Canon EOS R5 or Sony A7R IV).
+Maintain the EXACT facial features, skin tone, hair, body proportions and unique characteristics from the reference images.
+Photo style: 35mm f/1.4 lens, shallow depth of field, natural golden hour lighting, 
+warm film color grading, genuine skin textures with pores visible, natural hair strands,
+realistic fabric wrinkles on clothing, ambient light reflections in eyes.
+Do NOT make it look like AI art, CGI, or illustration. It must look like a real photograph taken by a professional wedding photographer.
 `.trim();
 
 export type SnapshotTheme =
@@ -15,34 +17,29 @@ export type SnapshotTheme =
   | 'beach_sunset'
   | 'classic_studio'
   | 'forest_garden'
-  | 'city_night'
   | 'autumn_park'
   | 'snowy_winter'
-  | 'lavender_field'
-  | 'rooftop_garden'
   | 'hanok_traditional';
 
 const SNAPSHOT_THEMES: Record<SnapshotTheme, string> = {
-  cherry_blossom: '만개한 벚꽃 나무 아래에서, 꽃잎이 흩날리는 봄날의 오후, 자연광',
-  beach_sunset: '해변에서 석양이 지는 골든아워, 파도 소리가 들리는 로맨틱한 분위기',
-  classic_studio: '클래식한 사진 스튜디오, 부드러운 스튜디오 조명, 크림색 배경',
-  forest_garden: '울창한 숲 속 정원, 초록 덩굴과 야생화, 자연 채광이 나뭇잎 사이로 스며드는 모습',
-  city_night: '도심 야경을 배경으로, 네온사인 반사, 시네마틱 느낌의 따뜻한 도시 야경',
-  autumn_park: '단풍이 물든 가을 공원, 붉고 노란 낙엽이 흩날리는 따뜻한 오후 빛',
-  snowy_winter: '하얀 눈이 내리는 겨울 풍경, 따뜻한 코트를 입고, 로맨틱한 눈 속 분위기',
-  lavender_field: '보라색 라벤더 밭, 프로방스풍 따뜻한 햇살과 향기로운 꽃밭',
-  rooftop_garden: '도심 루프탑 정원, 도시 스카이라인을 배경으로 한 로맨틱 가든 파티',
-  hanok_traditional: '전통 한옥 마당, 한복을 입고, 고즈넉한 한국 전통 분위기',
+  cherry_blossom: '만개한 벚꽃 나무 아래에서, 핑크빛 꽃잎이 부드럽게 흩날리는 봄날 오후, 자연광 역광, 배경 보케',
+  beach_sunset: '해변에서 석양이 지는 골든아워, 발밑에 부드러운 모래와 잔잔한 파도, 따뜻한 오렌지빛 역광',
+  classic_studio: '고급 웨딩 사진 스튜디오, Rembrandt 조명, 크리미한 아이보리 배경, 부드러운 그림자',
+  forest_garden: '울창한 초록 숲 속 가든 웨딩, 나뭇잎 사이로 스며드는 자연 채광, 야생화와 덩굴 장식',
+  autumn_park: '단풍이 만개한 가을 공원 산책로, 붉고 노란 낙엽이 흩날리는 따뜻한 오후, 역광 실루엣',
+  snowy_winter: '하얀 눈이 소복이 쌓인 겨울 풍경, 따뜻한 울 코트와 머플러, 입김이 보이는 로맨틱한 분위기',
+  hanok_traditional: '전통 한옥 대청마루와 기와지붕, 한복을 입고 단아한 자세, 고즈넉한 한국 전통 분위기',
 };
 
 export function buildSnapshotPrompt(theme: SnapshotTheme): string {
   return `
-Create a couple's pre-wedding snapshot photo.
+Create an ultra-realistic pre-wedding couple photograph.
 Scene: ${SNAPSHOT_THEMES[theme]}
-The couple is posing naturally and lovingly — smiling, holding hands, or looking at each other.
-Composition: Medium-to-full body shot, 4:3 aspect ratio.
+The couple is posing naturally and lovingly — genuine smiles, natural body language, holding hands or looking at each other with real emotion.
+Composition: Medium-to-full body shot, 4:3 aspect ratio, professional wedding photography composition with rule of thirds.
+Lighting: Natural light with subtle fill, realistic shadows, skin catch lights in eyes.
 ${STYLE_PREFIX}
-Generate one beautiful, high-quality image.
+Generate one stunning, photorealistic image that is indistinguishable from a real professional wedding photograph.
 `.trim();
 }
 
