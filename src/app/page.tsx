@@ -72,27 +72,60 @@ const JOURNEY_STEPS = [
   { icon: <IconGallery />, title: '추억 갤러리' },
 ];
 
-/* ─── 단독 인물 감지 ─── */
-async function detectSinglePerson(file: File): Promise<boolean> {
+/* ─── 얼굴 감지 (FaceDetector API + fallback) ─── */
+async function detectSinglePerson(file: File): Promise<{ ok: boolean; reason?: string }> {
   return new Promise((resolve) => {
     const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d')!;
-      ctx.drawImage(img, 0, 0);
-
-      // 이미지 비율 체크 — 초상화 비율(세로 > 가로) 또는 정사각형 근처면 OK
-      const ratio = img.width / img.height;
-      if (ratio > 2.5) {
-        // 극단적 가로 사진 = 단체 사진일 확률 높음
-        resolve(false);
+    img.onload = async () => {
+      // 1) 너무 작은 이미지 거부
+      if (img.width < 200 || img.height < 200) {
+        resolve({ ok: false, reason: '이미지가 너무 작아요. 최소 200x200 이상의 사진을 올려주세요.' });
         return;
       }
-      resolve(true);
+
+      // 2) FaceDetector API 사용 (Chrome/Edge 지원)
+      if (typeof window !== 'undefined' && 'FaceDetector' in window) {
+        try {
+          // @ts-expect-error FaceDetector is not in TS types
+          const detector = new window.FaceDetector({ maxDetectedFaces: 5 });
+          const faces = await detector.detect(img);
+
+          if (faces.length === 0) {
+            resolve({ ok: false, reason: '얼굴이 감지되지 않았어요. 얼굴이 잘 보이는 사진을 올려주세요.' });
+            return;
+          }
+          if (faces.length > 1) {
+            resolve({ ok: false, reason: `얼굴이 ${faces.length}명 감지되었어요. 한 명만 나온 사진을 올려주세요.` });
+            return;
+          }
+
+          // 얼굴 크기 체크 — 너무 작으면 멀리서 찍은 사진
+          const face = faces[0];
+          const faceArea = face.boundingBox.width * face.boundingBox.height;
+          const imgArea = img.width * img.height;
+          const faceRatio = faceArea / imgArea;
+
+          if (faceRatio < 0.01) {
+            resolve({ ok: false, reason: '얼굴이 너무 작게 나와요. 상반신 이상이 보이는 가까이서 찍은 사진을 올려주세요.' });
+            return;
+          }
+
+          resolve({ ok: true });
+          return;
+        } catch {
+          // FaceDetector 실패 시 fallback
+        }
+      }
+
+      // 3) Fallback: 기본 비율 체크만
+      const ratio = img.width / img.height;
+      if (ratio > 2.5) {
+        resolve({ ok: false, reason: '파노라마 사진은 사용할 수 없어요. 인물 사진을 올려주세요.' });
+        return;
+      }
+      resolve({ ok: true });
     };
-    img.onerror = () => resolve(true);
+    img.onerror = () => resolve({ ok: true });
     img.src = URL.createObjectURL(file);
   });
 }
@@ -178,10 +211,10 @@ export default function LandingPage() {
       return;
     }
 
-    // 단독 인물 감지
-    const isSingle = await detectSinglePerson(file);
-    if (!isSingle) {
-      setError('한 명만 나온 사진을 올려주세요. 단체 사진은 사용할 수 없어요.');
+    // 얼굴/체형 감지
+    const detection = await detectSinglePerson(file);
+    if (!detection.ok) {
+      setError(detection.reason || '적합한 사진이 아니에요.');
       if (type === 'her' && herInputRef.current) herInputRef.current.value = '';
       if (type === 'him' && himInputRef.current) himInputRef.current.value = '';
       return;
@@ -223,7 +256,13 @@ export default function LandingPage() {
       await uploadFile(himFile, 'him', sessionId);
       router.push(`/snapshots?session=${sessionId}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : '오류가 발생했습니다');
+      let msg = '오류가 발생했습니다';
+      if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        msg = '서버에 연결할 수 없어요. 인터넷 연결을 확인해주세요.';
+      } else if (err instanceof Error) {
+        msg = err.message;
+      }
+      setError(msg);
       setIsStarting(false);
     }
   };
