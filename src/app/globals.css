@@ -7,40 +7,40 @@
 
 /* --- CSS Variables --- */
 :root {
-  /* Colors – warm wedding palette */
+  /* Colors – bright cherry blossom wedding palette */
   --color-primary: #D4A574;
   --color-primary-hover: #C49464;
-  --color-primary-light: #E8CDB0;
-  --color-primary-glow: rgba(212, 165, 116, 0.4);
+  --color-primary-light: #F0D8C0;
+  --color-primary-glow: rgba(212, 165, 116, 0.3);
 
-  --color-secondary: #F5E6D3;
-  --color-accent: #C48B9F;
-  --color-accent-light: #E8B4C8;
-  --color-accent-glow: rgba(196, 139, 159, 0.35);
+  --color-secondary: #FFF0E8;
+  --color-accent: #F5A0B8;
+  --color-accent-light: #FFC8D8;
+  --color-accent-glow: rgba(245, 160, 184, 0.3);
 
-  --color-bg-cream: #FFF8F0;
-  --color-bg-warm: #FDF5EC;
+  --color-bg-cream: #FFFAF6;
+  --color-bg-warm: #FFF6F0;
   --color-bg-dark: #1A1A2E;
   --color-bg-dark-card: #232340;
 
   --color-text-primary: #2C2C2C;
-  --color-text-secondary: #6B6B6B;
-  --color-text-light: #999999;
-  --color-text-gold: #B8860B;
+  --color-text-secondary: #7A7A7A;
+  --color-text-light: #AAAAAA;
+  --color-text-gold: #C4960D;
   --color-text-white: #FAFAFA;
 
-  --color-border: rgba(212, 165, 116, 0.25);
-  --color-border-light: rgba(0, 0, 0, 0.06);
+  --color-border: rgba(212, 165, 116, 0.2);
+  --color-border-light: rgba(0, 0, 0, 0.05);
 
   --color-success: #6BCB77;
   --color-error: #E85D5D;
 
   /* Gradients */
-  --gradient-gold: linear-gradient(135deg, #D4A574 0%, #E8CDB0 50%, #D4A574 100%);
-  --gradient-rose: linear-gradient(135deg, #C48B9F 0%, #E8B4C8 100%);
-  --gradient-hero: linear-gradient(180deg, #FFF8F0 0%, #FDF0E6 40%, #F8E4D4 100%);
+  --gradient-gold: linear-gradient(135deg, #D4A574 0%, #F0D8C0 50%, #D4A574 100%);
+  --gradient-rose: linear-gradient(135deg, #F5A0B8 0%, #FFC8D8 100%);
+  --gradient-hero: linear-gradient(180deg, #FFFCF9 0%, #FFF5F0 35%, #FFEEE6 70%, #FFE5D8 100%);
   --gradient-dark: linear-gradient(180deg, #1A1A2E 0%, #16213E 100%);
-  --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.08) 100%);
 
   /* Typography – 부드러운 서체 */
   --font-serif: 'Gowun Batang', 'Nanum Myeongjo', serif;
@@ -383,38 +383,59 @@ h4 { font-size: 1.15rem; }
 /* --- Petal Animation (Landing) --- */
 @keyframes petalFall {
   0% {
-    transform: translateY(-10vh) rotate(0deg) translateX(0);
+    transform: translateY(-5vh) rotate(0deg) translateX(0);
     opacity: 0;
   }
-  10% {
-    opacity: 0.6;
+  8% {
+    opacity: 0.8;
   }
-  90% {
-    opacity: 0.4;
+  25% {
+    transform: translateY(25vh) rotate(90deg) translateX(30px);
+  }
+  50% {
+    transform: translateY(50vh) rotate(180deg) translateX(-20px);
+  }
+  75% {
+    transform: translateY(75vh) rotate(270deg) translateX(40px);
+    opacity: 0.5;
   }
   100% {
-    transform: translateY(105vh) rotate(720deg) translateX(60px);
+    transform: translateY(105vh) rotate(360deg) translateX(-10px);
     opacity: 0;
   }
 }
 
 .petal {
   position: fixed;
-  top: 0;
-  width: 10px;
-  height: 10px;
-  background: var(--color-accent-light);
+  top: -15px;
+  width: 12px;
+  height: 12px;
+  background: #FFB7C5;
   border-radius: 50% 0 50% 50%;
   opacity: 0;
   pointer-events: none;
   z-index: 0;
   animation: petalFall linear infinite;
+  box-shadow: 0 0 4px rgba(255, 183, 197, 0.3);
 }
 
 .petal:nth-child(odd) {
-  background: var(--color-primary-light);
-  width: 8px;
-  height: 8px;
+  background: #FFCDD8;
+  width: 9px;
+  height: 9px;
+}
+
+.petal:nth-child(3n) {
+  background: #FFA8BE;
+  width: 14px;
+  height: 14px;
+  opacity: 0.9;
+}
+
+.petal:nth-child(4n+1) {
+  background: #FFD4E0;
+  width: 7px;
+  height: 7px;
 }
 
 /* --- Loader / Shimmer --- */
