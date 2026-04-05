@@ -108,8 +108,11 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Add text prompt
-    contents.push({ text: prompt });
+    // Add text prompt with reference photo instruction
+    const refInstruction = referenceImages.length > 0 
+      ? `\nIMPORTANT: The generated image MUST feature the EXACT same people shown in the ${referenceImages.length} reference photo(s) above. Match their faces, hairstyles, skin tones, and body types precisely. Do NOT change their gender or appearance. If both reference photos show males, generate two males. If both show females, generate two females.`
+      : '';
+    contents.push({ text: prompt + refInstruction });
 
     // Call Gemini API with retry for rate limiting
     let response;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import StepIndicator from '@/components/layout/StepIndicator';
 import styles from './page.module.css';
@@ -79,6 +79,7 @@ function SnapshotsContent() {
   const [images, setImages] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
+  const [zoomImg, setZoomImg] = useState<string | null>(null);
 
   if (!sessionId) {
     return (
@@ -164,6 +165,13 @@ function SnapshotsContent() {
 
   return (
     <div className={styles.content}>
+      {/* Zoom Modal */}
+      {zoomImg && (
+        <div className={styles.zoomOverlay} onClick={() => setZoomImg(null)}>
+          <img src={zoomImg} alt="확대" className={styles.zoomImage} />
+          <button className={styles.zoomClose} onClick={() => setZoomImg(null)}>✕</button>
+        </div>
+      )}
       <button
         className={styles.homeBtn}
         onClick={() => router.push('/')}
@@ -247,8 +255,9 @@ function SnapshotsContent() {
           </h3>
           <div className={styles.gallery}>
             {images.map((url, i) => (
-              <div key={i} className={styles.imageCard}>
+              <div key={i} className={styles.imageCard} onClick={() => setZoomImg(url)} style={{ cursor: 'pointer' }}>
                 <img src={url} alt={`스냅사진 ${i + 1}`} className={styles.generatedImage} />
+                <div className={styles.zoomHint}>🔍 확대</div>
               </div>
             ))}
           </div>

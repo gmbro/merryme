@@ -7,12 +7,12 @@ import StepIndicator from '@/components/layout/StepIndicator';
 import styles from './page.module.css';
 
 const VENUE_STYLES = [
-  { id: 'garden', name: '가든 웨딩', desc: '야외 정원, 자연광, 꽃 아치', preview: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400&h=300&fit=crop', style: 'Outdoor garden wedding with floral arch, natural sunlight, lush greenery, white chairs, warm afternoon light' },
-  { id: 'chapel', name: '채플 웨딩', desc: '스테인드글라스, 고전 분위기', preview: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=300&fit=crop', style: 'Classic chapel wedding with stained glass windows, white marble interior, elegant chandeliers, wooden pews' },
-  { id: 'hotel_ballroom', name: '호텔 볼룸', desc: '화려한 샹들리에, 클래식 연회장', preview: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400&h=300&fit=crop', style: 'Luxury hotel ballroom wedding with crystal chandeliers, gold accents, white draping, elegant table settings' },
-  { id: 'beach', name: '비치 웨딩', desc: '해변 석양, 로맨틱 트로피컬', preview: 'https://images.unsplash.com/photo-1545232979-8bf68ee9b1af?w=400&h=300&fit=crop', style: 'Beach wedding at sunset with white fabric canopy, ocean waves, tropical flowers, barefoot on sand' },
+  { id: 'garden', name: '정원 웨딩', desc: '야외 정원, 자연광, 꽃 아치', preview: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400&h=300&fit=crop', style: 'Outdoor garden wedding venue with floral arch, natural sunlight, lush greenery, white chairs, warm afternoon light, flower-lined aisle' },
+  { id: 'hotel', name: '호텔 웨딩', desc: '화려한 샹들리에, 클래식 연회장', preview: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400&h=300&fit=crop', style: 'Luxury hotel ballroom wedding with crystal chandeliers, gold accents, white draping, elegant table settings, marble floor' },
+  { id: 'beach', name: '해변 웨딩', desc: '해변 석양, 로맨틱 분위기', preview: 'https://images.unsplash.com/photo-1545232979-8bf68ee9b1af?w=400&h=300&fit=crop', style: 'Beach wedding at golden sunset with white fabric canopy, ocean waves, tropical flowers, barefoot on white sand' },
+  { id: 'rooftop', name: '루프탑 웨딩', desc: '도심 스카이라인, 시티뷰', preview: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=400&h=300&fit=crop', style: 'Rooftop wedding with city skyline view at twilight, string lights, modern minimalist decoration, urban chic atmosphere' },
   { id: 'hanok', name: '한옥 웨딩', desc: '전통 한옥, 한국 전통혼례', preview: 'https://images.unsplash.com/photo-1577717903315-1691ae25ab3f?w=400&h=300&fit=crop', style: 'Traditional Korean Hanok wedding venue with wooden architecture, paper lanterns, traditional decorations, courtyard ceremony' },
-  { id: 'rooftop', name: '루프탑 웨딩', desc: '도심 야경, 시티뷰 루프탑', preview: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400&h=260&fit=crop&crop=top', style: 'Rooftop wedding with city skyline view at twilight, string lights, modern minimalist decoration, urban chic atmosphere' },
+  { id: 'cathedral', name: '성당 웨딩', desc: '고딕 성당, 스테인드글라스', preview: 'https://images.unsplash.com/photo-1543489822-c49534f3271f?w=400&h=300&fit=crop', style: 'Grand cathedral wedding with tall Gothic arches, stained glass windows casting colorful light, stone columns, white flower arrangements along the aisle' },
 ];
 
 interface VenueItem {

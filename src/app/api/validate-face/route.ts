@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     const label = type === 'her' ? '신부' : '신랑';
 
     // Try multiple model names for compatibility
-    const MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash'];
+    const MODELS = ['gemini-2.5-flash'];
     let lastError = '';
 
     for (const model of MODELS) {
