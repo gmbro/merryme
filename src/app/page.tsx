@@ -252,11 +252,25 @@ export default function LandingPage() {
   };
 
   const uploadFile = async (file: File, type: 'her' | 'him', sessionId?: string) => {
+    // 업로드 전 이미지 압축 (413 방지)
+    const compressed = await compressImage(file);
+    
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', compressed);
     formData.append('type', type);
     if (sessionId) formData.append('sessionId', sessionId);
     const res = await fetch('/api/upload', { method: 'POST', body: formData });
+    
+    if (res.status === 413) {
+      throw new Error('사진 용량이 너무 커요. 더 작은 사진을 올려주세요.');
+    }
+    
+    // 응답이 JSON인지 확인
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      throw new Error(`서버 오류가 발생했어요. (${res.status})`);
+    }
+    
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || '업로드 실패');
     return data;
