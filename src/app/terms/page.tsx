@@ -127,7 +127,7 @@ export default function TermsPage() {
 
           <div className={styles.companyInfo}>
             <p><strong>(주)아키랩</strong></p>
-            <p>대표이사: 이경민</p>
+            <p>개인정보보호 책임자: 이경민</p>
           </div>
         </div>
       </main>

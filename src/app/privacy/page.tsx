@@ -131,7 +131,7 @@ export default function PrivacyPage() {
               <p><strong>개인정보 보호책임자</strong></p>
               <ul>
                 <li>성명: 이경민</li>
-                <li>직책: 대표이사</li>
+                <li>직책: 개인정보보호 책임자</li>
                 <li>소속: (주)아키랩</li>
                 <li>연락처: privacy@archilab.co.kr</li>
               </ul>

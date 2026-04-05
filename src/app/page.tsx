@@ -306,7 +306,7 @@ export default function LandingPage() {
                 ) : herPreview ? (
                   <span className={styles.uploadDone}>업로드 완료</span>
                 ) : (
-                  '신부 사진을 업로드해주세요'
+                  '신부 사진 올리기'
                 )}
               </span>
             </div>
@@ -344,7 +344,7 @@ export default function LandingPage() {
                 ) : himPreview ? (
                   <span className={styles.uploadDone}>업로드 완료</span>
                 ) : (
-                  '신랑 사진을 업로드해주세요'
+                  '신랑 사진 올리기'
                 )}
               </span>
             </div>
@@ -357,7 +357,7 @@ export default function LandingPage() {
               <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" />
               <line x1="12" y1="17" x2="12.01" y2="17" />
             </svg>
-            어떤 사진을 올려야 하나요?
+            사진 가이드 보기
           </button>
 
           {error && <p className={styles.errorMsg}>{error}</p>}
@@ -383,12 +383,12 @@ export default function LandingPage() {
       <footer className={styles.footer}>
         <div className="container">
           <p className={styles.footerBrand}>메리미</p>
-          <p className={styles.footerCompany}>(주)아키랩 · 대표이사 이경민</p>
+          <p className={styles.footerCompany}>(주)아키랩 · 개인정보보호 책임자 이경민</p>
           <p className={styles.footerCopy}>
             &copy; 2026 MerryMe · AI 기반 가상 결혼 체험
           </p>
           <p className={styles.footerNote}>
-            모든 이미지는 AI로 생성되며 실제 인물과 무관합니다
+            모든 이미지는 AI로 생성되며 실제 배경과 무관합니다
           </p>
           <div className={styles.footerLinks}>
             <a href="/privacy" className={styles.footerLink}>개인정보처리방침</a>
