@@ -6,6 +6,7 @@
 const STYLE_PREFIX = `
 CRITICAL COMPOSITION: The female bride MUST ALWAYS be positioned on the LEFT side of the image, and the male groom MUST ALWAYS be positioned on the RIGHT side of the image. This is technically mandatory for face-swap tracking.
 CRITICAL IDENTITY MATCHING: You MUST structure the generated face shapes, jawlines, and facial spacing EXACTLY like the reference photos. Do NOT generate generic attractive faces. YOU MUST CLONE the identity of the references.
+CRITICAL EXPRESSION MATCHING: The generated faces MUST have a completely NEUTRAL expression or a very subtle, closed-mouth smile. ABSOLUTELY NO open mouths, NO visible teeth, and NO big smiles or laughing. Extreme expressions will severely break the subsequent face-mapping algorithm.
 CRITICAL DESIGN: Generate an ultra-realistic photograph that looks like it was taken with a professional DSLR camera (Canon EOS R5 or Sony A7R IV).
 Maintain the EXACT facial features, skin tone, hair, body proportions and unique characteristics from the reference images.
 Photo style: 35mm f/1.4 lens, shallow depth of field, natural golden hour lighting, 
@@ -35,10 +36,10 @@ const SNAPSHOT_THEMES: Record<SnapshotTheme, string> = {
 
 export function buildSnapshotPrompt(theme: SnapshotTheme, angleIndex: number = 0): string {
   const angles = [
-    'Full body shot from front, the couple facing camera with natural smiles, one person\'s arm around the other\'s waist, relaxed and genuine pose',
-    'Medium shot of one person giving the other a piggyback ride, both laughing joyfully, candid and playful moment',
+    'Full body shot from front, the couple facing camera with a subtle closed-mouth smile, one person\'s arm around the other\'s waist, relaxed and genuine pose',
+    'Medium shot of one person giving the other a piggyback ride, both showing gentle expressions, candid and soft moment',
     'Close-up of the couple touching foreheads gently, eyes closed, tender romantic moment, shallow depth of field bokeh',
-    'Wide shot of the couple twirling/dancing together, dress flowing in the breeze, dynamic and joyful movement captured mid-spin',
+    'Wide shot of the couple twirling/dancing together, dress flowing in the breeze, graceful movement captured mid-spin, calm facial expressions',
   ];
   const angle = angles[angleIndex % angles.length];
 
@@ -103,10 +104,10 @@ ${STYLE_PREFIX}
 
 export function buildVenuePrompt(venueStyle: string, angleIndex: number = 0): string {
   const angles = [
-    'Wide cinematic shot of the couple walking down the aisle together, guests standing on both sides watching and smiling, flower petals in the air, bridal entrance moment',
-    'Medium shot of the couple standing before the officiant at the altar exchanging wedding vows, hands held together, emotional and heartfelt moment',
+    'Wide cinematic shot of the couple walking down the aisle together, guests standing on both sides watching, flower petals in the air, bridal entrance moment, calm expressions',
+    'Medium shot of the couple standing before the officiant at the altar exchanging wedding vows, hands held together, emotional and heartfelt moment, serene faces',
     'The couple performing a traditional bow ceremony (맞절) facing each other at the altar, respectful and solemn, guests watching in the background',
-    'Joyful exit scene — the couple walking back up the aisle together after the ceremony, huge smiles, guests clapping and waving, confetti or petals flying',
+    'Joyful exit scene — the couple walking back up the aisle together after the ceremony, graceful posture, guests clapping and waving, confetti or petals flying, soft closed-mouth smiles',
   ];
   const angle = angles[angleIndex % angles.length];
 
@@ -123,9 +124,9 @@ Generate one stunning, photorealistic wedding ceremony photograph.
 
 export function buildHoneymoonPrompt(destination: string, scene: string, angleIndex: number = 0): string {
   const angles = [
-    'Wide shot of the couple in matching casual summer outfits (linen shirts, sundress), posing at a famous landmark, happy tourist pose with the scenic background',
-    'Medium shot of the couple in smart-casual evening wear, enjoying a romantic candlelit dinner at an outdoor restaurant, warm ambient lighting, holding wine glasses',
-    'Candid lifestyle shot of the couple in sporty/adventure outfits (light jackets, sneakers), walking hand-in-hand on a scenic trail or beach, wind in their hair, natural laughter',
+    'Wide shot of the couple in matching casual summer outfits (linen shirts, sundress), posing at a famous landmark, relaxed pose with the scenic background, subtle closed-mouth smile',
+    'Medium shot of the couple in smart-casual evening wear, enjoying a romantic candlelit dinner at an outdoor restaurant, warm ambient lighting, holding wine glasses, serene faces',
+    'Candid lifestyle shot of the couple in sporty/adventure outfits (light jackets, sneakers), walking hand-in-hand on a scenic trail or beach, wind in their hair, calm and composed',
     'Close-up romantic portrait of the couple in elegant resort wear, sitting together at a scenic viewpoint during golden hour sunset, heads leaning toward each other',
   ];
   const angle = angles[angleIndex % angles.length];
