@@ -95,8 +95,8 @@ function GeneratingContent() {
 
       <div className={styles.content}>
         <div className={styles.textWrapper}>
-          <h1 className={styles.title}>두 분의 웨딩 스토리를 그리는 중입니다</h1>
-          <p className={styles.subtitle}>수십 장의 스냅, 예식장, 신혼여행 이미지를 생성하고 있어요.<br/>(약 1분 정도 소요될 수 있습니다)</p>
+          <h1 className={styles.title}>세상에서 가장 아름다운 순간을 준비하고 있어요</h1>
+          <p className={styles.subtitle}>눈부신 예식장부터 낭만적인 신혼여행까지, 두 분만의 찬란한 여정을 그려내고 있습니다.<br/>(정성스럽게 담아내느라 약 1분 정도 걸릴 수 있어요)</p>
           
           <div className={styles.progressContainer}>
             <div className={styles.progressBar}>
