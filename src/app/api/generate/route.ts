@@ -153,13 +153,13 @@ export async function POST(request: NextRequest) {
       ? `
 
 === CHARACTER CONSISTENCY INSTRUCTIONS ===
-The reference photo(s) above show the REAL people who must appear in the generated image.
+The reference photo(s) above show the REAL people who must appear in the generated image. DO NOT CREATE GENERIC YOUNG ATTRACTIVE MODELS.
 ${bodyInstruction}
-2. SKIN: Match the exact skin tone and complexion from the face reference photos.
-3. HAIR: Same hairstyle, hair color, hair length, hair texture.
-4. GENDER: First reference = bride (female), second reference = groom (male).
-5. FACE: Generate faces that closely resemble the 1ST and 2ND reference photos. The faces should be clearly visible and well-lit.
-6. The people in the output image must look natural and proportionate.
+2. AGE AND FACIAL GEOMETRY (CRITICAL): You MUST EXACTLY MATCH the physical age, face shape, roundness, wrinkles, and jawline of the people in the reference photos. If the reference is a 50-year-old with a round face, generate exactly a 50-year-old with a round face.
+3. GLASSES AND ACCESSORIES (CRITICAL): If the reference person is wearing glasses, YOU MUST generate them wearing identical glasses. If they do not have glasses, do not add them.
+4. SKIN & HAIR: Match the exact skin tone, complexion, hairstyle, hair color, and texture.
+5. GENDER: First reference = bride (female), second reference = groom (male).
+6. RESULT: The generated base image must look like the EXACT SAME PEOPLE from the reference images, just in a different setting.
 === END CHARACTER INSTRUCTIONS ===`
       : '';
     contents.push({ text: prompt + refInstruction });

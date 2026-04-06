@@ -4,6 +4,7 @@ import { useState, useEffect, use, useCallback, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useVideoExport } from '@/hooks/useVideoExport';
 import Footer from '@/components/layout/Footer';
+import ReviewModal from '@/components/gallery/ReviewModal';
 import styles from './page.module.css';
 
 interface GalleryImage {
@@ -231,6 +232,12 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
   const [zoomImg, setZoomImg] = useState<string | null>(null);
   const [isPaid, setIsPaid] = useState(false);
   const [checkingPayment, setCheckingPayment] = useState(false);
+  
+  // Veo States
+  const [reviewImgUrl, setReviewImgUrl] = useState<string | null>(null);
+  const [generatingImages, setGeneratingImages] = useState<Set<string>>(new Set());
+  const [completedVideos, setCompletedVideos] = useState<Record<string, string>>({});
+  
   const { user, loading: authLoading, signInWithGoogle } = useAuth();
   const { exportVideo, exporting: videoExporting, progress: videoProgress } = useVideoExport();
 
@@ -253,16 +260,30 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
     (data.images[step as keyof GalleryData['images']] || []).map(img => ({ url: img.url, step }))
   ) : [];
 
-  // Check auth intent for automatic payment modal popup
+  // Check auth intent for automatic actions after login
   useEffect(() => {
     if (user && !authLoading) {
-      const intentKey = `merryme_intent_download_${sessionId}`;
-      if (localStorage.getItem(intentKey) === 'true') {
-        localStorage.removeItem(intentKey);
+      // 1. Download Intent
+      const dlIntentKey = `merryme_intent_download_${sessionId}`;
+      if (localStorage.getItem(dlIntentKey) === 'true') {
+        localStorage.removeItem(dlIntentKey);
         if (!isPaid) {
           setShowPaymentModal(true);
         } else if (allSlideImages.length > 0) {
           exportVideo(allSlideImages.map((i) => i.url), `MerryMe_Wedding_${sessionId.slice(0, 8)}.webm`);
+        }
+      }
+
+      // 2. Veo Video Intent
+      const veoIntentKeyPrefix = `merryme_intent_veo_${sessionId}_`;
+      // Find any veo intent
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith(veoIntentKeyPrefix) && localStorage.getItem(key) === 'true') {
+          const imgUrl = atob(key.replace(veoIntentKeyPrefix, ''));
+          localStorage.removeItem(key);
+          setReviewImgUrl(imgUrl);
+          break; // Process one intent at a time
         }
       }
     }
@@ -275,6 +296,11 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
         const json = await res.json();
         if (!res.ok) throw new Error(json.error || '갤러리 로드 실패');
         setData(json);
+        // Automatically start slideshow
+        if (json.totalCount > 0 && !sessionStorage.getItem(`merryme_slideshow_seen_${sessionId}`)) {
+          setShowSlideshow(true);
+          sessionStorage.setItem(`merryme_slideshow_seen_${sessionId}`, 'true');
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : '오류 발생');
       } finally {
@@ -358,7 +384,7 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
         setIsPaid(true);
         localStorage.setItem(`merryme_paid_${sessionId}`, 'true');
         setShowPaymentModal(false);
-        alert('결제가 완료되었습니다! 영상을 다운로드할 수 있어요.');
+        alert('결제가 완료되었습니다! 앨범을 다운로드할 수 있어요.');
       } else {
         alert('결제 검증에 실패했습니다. 고객센터에 문의해주세요.');
       }
@@ -368,6 +394,43 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
     } finally {
       setCheckingPayment(false);
     }
+  }, [sessionId]);
+
+  const handleVeoClick = useCallback((imgUrl: string) => {
+    if (!user) {
+      localStorage.setItem(`merryme_intent_veo_${sessionId}_${btoa(imgUrl)}`, 'true');
+      setShowLoginModal(true);
+      return;
+    }
+    setReviewImgUrl(imgUrl);
+  }, [user, sessionId]);
+
+  const handleReviewSuccess = useCallback((imgUrl: string) => {
+    setReviewImgUrl(null);
+    setGeneratingImages(prev => { const n = new Set(prev); n.add(imgUrl); return n; });
+
+    fetch('/api/generate-video', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId, imageUrl: imgUrl })
+    })
+    .then(async (res) => {
+      const result = await res.json();
+      if (res.ok && result.success) {
+        setTimeout(() => {
+          setGeneratingImages(prev => { const n = new Set(prev); n.delete(imgUrl); return n; });
+          setCompletedVideos(prev => ({ ...prev, [imgUrl]: imgUrl })); 
+          alert('영상이 성공적으로 생성되었습니다!');
+        }, 60000); 
+      } else {
+        throw new Error(result.error || '영상 생성 요청 실패');
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      setGeneratingImages(prev => { const n = new Set(prev); n.delete(imgUrl); return n; });
+      alert('영상 생성 중 문제가 발생하였습니다. 문의바랍니다.');
+    });
   }, [sessionId]);
 
   if (loading) {
@@ -441,17 +504,16 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
         <div className={styles.paymentOverlay} onClick={() => setShowPaymentModal(false)}>
           <div className={styles.paymentModal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.paymentBadge}>Premium</div>
-            <h3 className={styles.paymentTitle}>영상 다운로드</h3>
+            <h3 className={styles.paymentTitle}>앨범 전체 다운로드</h3>
             <p className={styles.paymentDesc}>
-              영상 생성 및 무제한 다운로드 혜택을 누리세요
+              무제한 다운로드로 특별한 여정 간직
             </p>
             <div className={styles.priceBox}>
               <span className={styles.priceAmount}>단돈 $1</span>
               <span className={styles.priceLabel}>(1,000원) / 1회 결제</span>
             </div>
             <ul className={styles.priceFeatures}>
-              <li>1080p Full HD 영상</li>
-              <li>Ken Burns 시네마틱 효과</li>
+              <li>HD 해상도 이미지</li>
               <li>모든 사진 포함</li>
             </ul>
             <button
@@ -460,13 +522,22 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
               disabled={checkingPayment}
               style={{ width: '100%', whiteSpace: 'nowrap' }}
             >
-              {checkingPayment ? '결제 준비 중...' : '단돈 $1에 결제하고 영상 보기'}
+              {checkingPayment ? '결제 준비 중...' : '단돈 $1에 결제하고 다운로드하기'}
             </button>
             <button className={styles.paymentCancel} onClick={() => setShowPaymentModal(false)}>
               다음에 할게요
             </button>
           </div>
         </div>
+      )}
+
+      {/* Review Modal for Veo Generation */}
+      {reviewImgUrl && (
+        <ReviewModal 
+          sessionId={sessionId}
+          onSuccess={() => handleReviewSuccess(reviewImgUrl)}
+          onClose={() => setReviewImgUrl(null)}
+        />
       )}
 
       <main className={styles.main}>
@@ -492,11 +563,65 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
                   <span className={styles.stepCount}>{imgs.length}장</span>
                 </div>
                 <div className={styles.imageGrid}>
-                  {imgs.map((img, i) => (
-                    <div key={img.name} className={styles.imageCard} onClick={() => setZoomImg(img.url)}>
-                      <img src={img.url} alt={`${STEP_TITLES[step]} ${i + 1}`} loading="lazy" />
-                    </div>
-                  ))}
+                  {imgs.map((img, i) => {
+                    const isGenerating = generatingImages.has(img.url);
+                    const isCompleted = !!completedVideos[img.url];
+
+                    return (
+                      <div key={img.name} className={styles.imageCard} style={{ position: 'relative' }}>
+                        <div onClick={() => !isGenerating && setZoomImg(img.url)} style={{ cursor: isGenerating ? 'wait' : 'pointer' }}>
+                          <img 
+                            src={img.url} 
+                            alt={`${STEP_TITLES[step]} ${i + 1}`} 
+                            loading="lazy" 
+                            style={{ opacity: isGenerating ? 0.6 : 1 }}
+                          />
+                        </div>
+
+                        {/* Generation Overlay / Controls */}
+                        {!isGenerating && !isCompleted && (
+                          <div 
+                            onClick={(e) => { e.stopPropagation(); handleVeoClick(img.url); }}
+                            style={{
+                              position: 'absolute', bottom: 8, right: 8,
+                              background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)',
+                              color: '#fff', padding: '6px 12px', borderRadius: '8px',
+                              fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', zIndex: 10,
+                              display: 'flex', alignItems: 'center', gap: '6px',
+                              border: '1px solid rgba(255,255,255,0.2)', transition: 'background 0.2sease'
+                            }}
+                          >
+                            🎬 움직이는 영상 무료로 만들기
+                          </div>
+                        )}
+                        {isGenerating && (
+                          <div style={{
+                            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                            display: 'flex', flexDirection: 'column', alignItems: 'center',
+                            justifyContent: 'center', background: 'rgba(0,0,0,0.5)',
+                            color: '#fff', zIndex: 10, borderRadius: '12px'
+                          }}>
+                            <span className="loader-ring" style={{ width: 24, height: 24, borderTopColor: '#FF6B6B', marginBottom: 8 }} />
+                            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>1~2분 소요됩니다...</span>
+                          </div>
+                        )}
+                        {isCompleted && (
+                          <a 
+                            href={completedVideos[img.url]}
+                            download={`MerryMe_Video_${Date.now()}.mp4`}
+                            style={{
+                              position: 'absolute', bottom: 8, right: 8,
+                              background: 'var(--brand)', color: '#fff', padding: '6px 12px', borderRadius: '8px',
+                              fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', zIndex: 10, textDecoration: 'none',
+                              display: 'flex', alignItems: 'center', gap: '6px',
+                            }}
+                          >
+                            🎬 고화질 영상 다운로드
+                          </a>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </section>
             );
@@ -510,8 +635,11 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
                   영상 생성 중... {videoProgress}% 
                 </div>
               )}
-              <button className="btn btn-primary btn-large" onClick={handleVideoView} disabled={videoExporting} style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }}>
-                영상으로 보기
+              <button className="btn btn-primary" onClick={handleVideoView} style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }}>
+                슬라이드쇼 미리보기(무료)
+              </button>
+              <button className="btn btn-glass" onClick={handleDownloadRequest} disabled={videoExporting} style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap', marginTop: 12 }}>
+                전체 이미지 앨범 다운로드
               </button>
               <a href="/" className="btn btn-ghost" style={{ whiteSpace: 'nowrap' }}>
                 처음으로 돌아가기
