@@ -106,7 +106,7 @@ function useAcousticMusic() {
 }
 
 /* ─── Cinematic Slideshow Popup ─── */
-function CinematicSlideshow({ allImages, onClose }: { allImages: { url: string; step: string }[]; onClose: () => void }) {
+function CinematicSlideshow({ allImages, onClose, onDownloadRequest }: { allImages: { url: string; step: string }[]; onClose: () => void; onDownloadRequest: () => void }) {
   const [current, setCurrent] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const { start: startMusic, stop: stopMusic, toggleMute, isMuted } = useAcousticMusic();
@@ -174,9 +174,15 @@ function CinematicSlideshow({ allImages, onClose }: { allImages: { url: string; 
           {isPaused && current >= allImages.length - 1 && (
             <div className={styles.slideshowEnd}>
               <p>우리의 아름다운 여정</p>
-              <button className="btn btn-glass" onClick={(e) => { e.stopPropagation(); setCurrent(0); setIsPaused(false); setKenBurns(0); }}>
-                처음부터 다시 보기
-              </button>
+              <h3>영상을 다운로드 하시겠습니까?</h3>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', justifyContent: 'center', marginTop: '1.5rem' }}>
+                <button className="btn btn-primary" onClick={(e) => { e.stopPropagation(); onDownloadRequest(); }}>
+                  네, 다운로드할게요
+                </button>
+                <button className="btn btn-glass" onClick={(e) => { e.stopPropagation(); setCurrent(0); setIsPaused(false); setKenBurns(0); }}>
+                  처음부터 다시 보기
+                </button>
+              </div>
             </div>
           )}
           {isPaused && current < allImages.length - 1 && (
@@ -225,7 +231,7 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
   const [zoomImg, setZoomImg] = useState<string | null>(null);
   const [isPaid, setIsPaid] = useState(false);
   const [checkingPayment, setCheckingPayment] = useState(false);
-  const { user, signInWithGoogle } = useAuth();
+  const { user, loading: authLoading, signInWithGoogle } = useAuth();
   const { exportVideo, exporting: videoExporting, progress: videoProgress } = useVideoExport();
 
   // Check ?paid=true from Stripe redirect
@@ -242,6 +248,25 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
     const paid = localStorage.getItem(`merryme_paid_${sessionId}`);
     if (paid === 'true') setIsPaid(true);
   }, [sessionId]);
+
+  const allSlideImages = typeof window !== 'undefined' && data ? ['snapshot', 'venue', 'honeymoon'].flatMap(step => 
+    (data.images[step as keyof GalleryData['images']] || []).map(img => ({ url: img.url, step }))
+  ) : [];
+
+  // Check auth intent for automatic payment modal popup
+  useEffect(() => {
+    if (user && !authLoading) {
+      const intentKey = `merryme_intent_download_${sessionId}`;
+      if (localStorage.getItem(intentKey) === 'true') {
+        localStorage.removeItem(intentKey);
+        if (!isPaid) {
+          setShowPaymentModal(true);
+        } else if (allSlideImages.length > 0) {
+          exportVideo(allSlideImages.map((i) => i.url), `MerryMe_Wedding_${sessionId.slice(0, 8)}.webm`);
+        }
+      }
+    }
+  }, [user, authLoading, isPaid, sessionId, exportVideo, allSlideImages]);
 
   useEffect(() => {
     async function fetchGallery() {
@@ -280,17 +305,19 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
     }
   }, [sessionId]);
 
-  const handleVideoDownload = useCallback((allUrls: string[]) => {
-    if (!user) { setShowLoginModal(true); return; }
+  const handleDownloadRequest = useCallback(() => {
+    if (!user) { 
+      localStorage.setItem(`merryme_intent_download_${sessionId}`, 'true');
+      setShowLoginModal(true); 
+      return; 
+    }
     if (!isPaid) { setShowPaymentModal(true); return; }
-    exportVideo(allUrls, `MerryMe_Wedding_${sessionId.slice(0, 8)}.webm`);
-  }, [user, isPaid, exportVideo, sessionId]);
+    exportVideo(allSlideImages.map(i => i.url), `MerryMe_Wedding_${sessionId.slice(0, 8)}.webm`);
+  }, [user, isPaid, exportVideo, sessionId, allSlideImages]);
 
   const handleVideoView = useCallback(() => {
-    if (!user) { setShowLoginModal(true); return; }
-    if (!isPaid) { setShowPaymentModal(true); return; }
     setShowSlideshow(true);
-  }, [user, isPaid]);
+  }, []);
 
   const handleCheckout = useCallback(async () => {
     setCheckingPayment(true);
@@ -368,16 +395,11 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
 
   const steps = ['snapshot', 'venue', 'honeymoon'] as const;
   const hasImages = data.totalCount > 0;
-  const allSlideImages: { url: string; step: string }[] = [];
-  steps.forEach((step) => {
-    const imgs = data.images[step];
-    if (imgs) imgs.forEach((img) => allSlideImages.push({ url: img.url, step }));
-  });
 
   return (
     <>
       {showSlideshow && allSlideImages.length > 0 && (
-        <CinematicSlideshow allImages={allSlideImages} onClose={() => setShowSlideshow(false)} />
+        <CinematicSlideshow allImages={allSlideImages} onClose={() => setShowSlideshow(false)} onDownloadRequest={handleDownloadRequest} />
       )}
 
       {zoomImg && (
@@ -483,20 +505,13 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
           {/* Bottom Actions */}
           {hasImages && (
             <div className={styles.bottomActions}>
-              <button className="btn btn-primary btn-large" onClick={handleVideoView} style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }}>
+              {videoExporting && (
+                <div style={{ marginBottom: 12, fontSize: '0.9rem', color: 'var(--brand)', fontWeight: 600 }}>
+                  영상 생성 중... {videoProgress}% 
+                </div>
+              )}
+              <button className="btn btn-primary btn-large" onClick={handleVideoView} disabled={videoExporting} style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }}>
                 영상으로 보기
-              </button>
-              <button
-                className="btn btn-secondary btn-large"
-                onClick={() => handleVideoDownload(allSlideImages.map(i => i.url))}
-                disabled={videoExporting}
-                style={{ width: '100%', maxWidth: 360, whiteSpace: 'nowrap' }}
-              >
-                {videoExporting
-                  ? `영상 생성 중... ${videoProgress}%`
-                  : isPaid
-                    ? '영상 다운로드 (1080p)'
-                    : '영상 다운로드 (단돈 $1)'}
               </button>
               <a href="/" className="btn btn-ghost" style={{ whiteSpace: 'nowrap' }}>
                 처음으로 돌아가기
