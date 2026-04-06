@@ -5,6 +5,7 @@
 
 const STYLE_PREFIX = `
 CRITICAL COMPOSITION: The female bride MUST ALWAYS be positioned on the LEFT side of the image, and the male groom MUST ALWAYS be positioned on the RIGHT side of the image. This is technically mandatory for face-swap tracking.
+CRITICAL IDENTITY MATCHING: You MUST structure the generated face shapes, jawlines, and facial spacing EXACTLY like the reference photos. Do NOT generate generic attractive faces. YOU MUST CLONE the identity of the references.
 CRITICAL DESIGN: Generate an ultra-realistic photograph that looks like it was taken with a professional DSLR camera (Canon EOS R5 or Sony A7R IV).
 Maintain the EXACT facial features, skin tone, hair, body proportions and unique characteristics from the reference images.
 Photo style: 35mm f/1.4 lens, shallow depth of field, natural golden hour lighting, 

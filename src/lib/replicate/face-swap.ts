@@ -82,7 +82,9 @@ function extractUrl(output: unknown): string | null {
 export async function swapCoupleFaces(
   herSourceUrl: string,
   himSourceUrl: string,
-  targetImageUrl: string
+  targetImageUrl: string,
+  brideIndex: number = 0,
+  groomIndex: number = 1
 ): Promise<string> {
   try {
     const MODEL_ID = 'mertguvencli/face-swap-with-indexes:518f2116425c40acb5c234031c55daf843c1357eff784370fe9489e57b65c150';
@@ -94,7 +96,7 @@ export async function swapCoupleFaces(
         source_image: herSourceUrl,
         target_image: targetImageUrl,
         source_face_index: 0,
-        target_face_indices: "0",
+        target_face_indices: brideIndex.toString(),
       },
     });
     
@@ -108,7 +110,7 @@ export async function swapCoupleFaces(
         source_image: himSourceUrl,
         target_image: brideResultUrl,
         source_face_index: 0,
-        target_face_indices: "1",
+        target_face_indices: groomIndex.toString(),
       },
     });
 

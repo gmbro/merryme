@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { genAI, GEMINI_MODEL } from '@/lib/gemini/client';
 import { createServiceClient } from '@/lib/supabase/server';
-import { swapCoupleFaces } from '@/lib/replicate/face-swap';
+import { swapCoupleFaces, swapFace } from '@/lib/replicate/face-swap';
 import {
   buildSnapshotPrompt,
   buildStylingPrompt,
@@ -37,6 +37,32 @@ async function fetchImageAsBase64(url: string): Promise<{ base64: string; mimeTy
   const base64 = Buffer.from(buffer).toString('base64');
   const mimeType = res.headers.get('content-type') || 'image/jpeg';
   return { base64, mimeType };
+}
+
+async function detectFacePositions(imageUrl: string): Promise<{ brideIndex: number; groomIndex: number }> {
+  try {
+    const { base64, mimeType } = await fetchImageAsBase64(imageUrl);
+    const result = await genAI.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            { inlineData: { data: base64, mimeType } },
+            { text: 'Look at the couple in this image. Who is on the left? Reply with EXACTLY "female,male" if the woman is on the left and man is on the right. Reply with "male,female" if the man is on the left. Reply with "female,male" as fallback if unsure.' },
+          ],
+        },
+      ],
+    });
+    const text = (result.text || '').toLowerCase();
+    if (text.includes('male,female') || text.includes('male, female')) {
+      return { brideIndex: 1, groomIndex: 0 };
+    }
+    return { brideIndex: 0, groomIndex: 1 };
+  } catch (error) {
+    console.error('Face position detection failed, falling back to 0,1:', error);
+    return { brideIndex: 0, groomIndex: 1 };
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -218,13 +244,48 @@ ${bodyInstruction}
           let finalUrl = urlData.publicUrl;
 
           // Multi-Face Swap: replace faces using FaceFusion
-          if (refUrls.her && refUrls.him) {
+          if (step === 'styling') {
+            const genderUrl = options.gender === 'him' ? refUrls.him : refUrls.her;
+            if (genderUrl) {
+              try {
+                console.log(`[FaceSwap-Single] Swapping face for styling...`);
+                const swappedUrl = await swapFace(genderUrl, finalUrl);
+                
+                // If swap succeeded, save to storage
+                if (swappedUrl !== finalUrl && swappedUrl.startsWith('http')) {
+                  const swapRes = await fetch(swappedUrl);
+                  const swapBuffer = Buffer.from(await swapRes.arrayBuffer());
+                  const swapName = `generated/${sessionId}/${step}/swap_${crypto.randomUUID()}.png`;
+                  
+                  await supabase.storage
+                    .from('merryme')
+                    .upload(swapName, swapBuffer, {
+                      contentType: 'image/png',
+                      upsert: true,
+                    });
+
+                  const { data: swapUrlData } = supabase.storage
+                    .from('merryme')
+                    .getPublicUrl(swapName);
+
+                  finalUrl = swapUrlData.publicUrl;
+                  console.log('[FaceSwap-Single] Saved swapped image');
+                }
+              } catch (swapErr) {
+                console.error('[FaceSwap-Single] Error, using Gemini original:', swapErr);
+              }
+            }
+          } else if (refUrls.her && refUrls.him) {
             try {
-              console.log(`[FaceSwap-Multi] Swapping faces for ${step}...`);
+              console.log(`[FaceSwap-Multi] Analyzing positions for ${step}...`);
+              const positions = await detectFacePositions(finalUrl);
+              console.log(`[FaceSwap-Multi] Swapping faces for ${step}... mapped Bride=${positions.brideIndex}, Groom=${positions.groomIndex}`);
               const swappedUrl = await swapCoupleFaces(
                 refUrls.her,
                 refUrls.him,
-                finalUrl
+                finalUrl,
+                positions.brideIndex,
+                positions.groomIndex
               );
               
               // If swap succeeded, save to storage
