@@ -290,7 +290,7 @@ export default function LandingPage() {
       if (coupleFile) {
         await uploadFile(coupleFile, 'couple', sessionId);
       }
-      router.push(`/snapshots?session=${sessionId}`);
+      router.push(`/generating?session=${sessionId}`);
     } catch (err) {
       let msg = '오류가 발생했습니다';
       if (err instanceof TypeError && err.message === 'Failed to fetch') {
