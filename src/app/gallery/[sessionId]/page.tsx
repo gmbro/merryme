@@ -42,6 +42,12 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
   const [reviewImgUrl, setReviewImgUrl] = useState<string | null>(null);
   const [generatingImages, setGeneratingImages] = useState<Set<string>>(new Set());
   const [completedVideos, setCompletedVideos] = useState<Record<string, string>>({});
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = useCallback((msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 4000);
+  }, []);
 
   useEffect(() => {
     async function fetchGallery() {
@@ -75,10 +81,11 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
     .then(async (res) => {
       const result = await res.json();
       if (res.ok && result.success) {
+        showToast('🎬 비디오 생성을 시작했습니다! 완성되면 알려드릴게요.');
         setTimeout(() => {
           setGeneratingImages(prev => { const n = new Set(prev); n.delete(imgUrl); return n; });
           setCompletedVideos(prev => ({ ...prev, [imgUrl]: imgUrl })); 
-          alert('영상이 성공적으로 생성되었습니다!');
+          showToast('✨ 영상이 성공적으로 생성되었습니다!');
         }, 60000); 
       } else {
         throw new Error(result.error || '영상 생성 요청 실패');
@@ -87,7 +94,7 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
     .catch(err => {
       console.error(err);
       setGeneratingImages(prev => { const n = new Set(prev); n.delete(imgUrl); return n; });
-      alert('영상 생성 중 문제가 발생하였습니다. 문의바랍니다.');
+      showToast('⚠️ 영상 생성 중 문제가 발생하였습니다.');
     });
   }, [sessionId]);
 
@@ -137,6 +144,19 @@ export default function GalleryPage({ params }: { params: Promise<{ sessionId: s
           onSuccess={() => handleReviewSuccess(reviewImgUrl)}
           onClose={() => setReviewImgUrl(null)}
         />
+      )}
+
+      {/* Global Toast */}
+      {toastMessage && (
+        <div style={{
+          position: 'fixed', bottom: '40px', left: '50%', transform: 'translateX(-50%)',
+          background: 'rgba(0,0,0,0.8)', color: '#fff', padding: '14px 28px',
+          borderRadius: '30px', zIndex: 1000, fontWeight: 500, fontSize: '0.95rem',
+          boxShadow: '0 10px 25px rgba(0,0,0,0.2)', transition: 'all 0.3s ease',
+          textAlign: 'center', minWidth: '300px'
+        }}>
+          {toastMessage}
+        </div>
       )}
 
       <main className={styles.main}>
