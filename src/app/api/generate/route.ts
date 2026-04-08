@@ -53,6 +53,7 @@ async function detectFacePositions(imageUrl: string): Promise<{ brideIndex: numb
           ],
         },
       ],
+      config: { thinkingConfig: { thinkingBudget: 0 } },
     });
     const text = (result.text || '').toLowerCase();
     if (text.includes('male,female') || text.includes('male, female')) {
@@ -175,6 +176,7 @@ ${bodyInstruction}
           contents: [{ role: 'user', parts: contents }],
           config: {
             responseModalities: ['TEXT', 'IMAGE'],
+            thinkingConfig: { thinkingBudget: 0 },
           },
         });
         break; // success

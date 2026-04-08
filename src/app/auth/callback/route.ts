@@ -34,13 +34,40 @@ export async function GET(request: NextRequest) {
       const { error } = await supabase.auth.exchangeCodeForSession(code);
       if (error) {
         console.error('Supabase exchangeCodeForSession error:', error);
-        return NextResponse.redirect(new URL(`/?error=auth&message=${encodeURIComponent(error.message)}`, requestUrl.origin));
+        // Error on Vercel: redirect with clear error
+        const forwardedHost = request.headers.get('x-forwarded-host');
+        const baseUrl = forwardedHost ? `https://${forwardedHost}` : requestUrl.origin;
+        return NextResponse.redirect(`${baseUrl}/?error=auth&message=${encodeURIComponent(error.message)}`);
+      }
+
+      // Success, perform redirect keeping x-forwarded-host in mind
+      const forwardedHost = request.headers.get('x-forwarded-host');
+      const isLocalEnv = process.env.NODE_ENV === 'development';
+      
+      if (isLocalEnv) {
+        return NextResponse.redirect(`${requestUrl.origin}${next}`);
+      } else if (forwardedHost) {
+        return NextResponse.redirect(`https://${forwardedHost}${next}`);
+      } else {
+        return NextResponse.redirect(`${requestUrl.origin}${next}`);
       }
     } catch (e) {
       console.error('Auth callback route exception:', e);
-      return NextResponse.redirect(new URL(`/?error=server&message=internal_error`, requestUrl.origin));
+      const forwardedHost = request.headers.get('x-forwarded-host');
+      const baseUrl = forwardedHost ? `https://${forwardedHost}` : requestUrl.origin;
+      return NextResponse.redirect(`${baseUrl}/?error=server&message=internal_error`);
     }
   }
 
-  return NextResponse.redirect(new URL(next, requestUrl.origin));
+  // If there's no code entirely, just redirect to next
+  const forwardedHost = request.headers.get('x-forwarded-host');
+  const isLocalEnv = process.env.NODE_ENV === 'development';
+  if (isLocalEnv) {
+    return NextResponse.redirect(`${requestUrl.origin}${next}`);
+  } else if (forwardedHost) {
+    return NextResponse.redirect(`https://${forwardedHost}${next}`);
+  } else {
+    return NextResponse.redirect(`${requestUrl.origin}${next}`);
+  }
 }
+

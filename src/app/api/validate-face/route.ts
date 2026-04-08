@@ -51,6 +51,7 @@ JSON만 응답:
                 },
               ],
             }],
+            config: { thinkingConfig: { thinkingBudget: 0 } },
           });
 
           const text = response.candidates?.[0]?.content?.parts?.[0]?.text || '';

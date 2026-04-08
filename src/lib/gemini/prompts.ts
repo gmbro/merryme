@@ -6,13 +6,12 @@
 const STYLE_PREFIX = `
 CRITICAL COMPOSITION: The female bride MUST ALWAYS be positioned on the LEFT side of the image, and the male groom MUST ALWAYS be positioned on the RIGHT side of the image. This is technically mandatory for face-swap tracking.
 CRITICAL IDENTITY MATCHING: You MUST structure the generated face shapes, jawlines, and facial spacing EXACTLY like the reference photos. Do NOT generate generic attractive faces. YOU MUST CLONE the identity of the references.
+CRITICAL MANDATORY INSTRUCTION - NO BEAUTIFICATION: You MUST KEEP THEIR EXACT REAL-LIFE AGE. If they are middle-aged, they MUST look middle-aged in the generated photo. DO NOT beautify. DO NOT make them look like young 20-something models. Preserve their true skin textures, wrinkles, exact realistic body type, and facial aging characteristics. If you generate generic young attractive models, this task will completely fail!
 CRITICAL EXPRESSION MATCHING: The generated faces MUST have a completely NEUTRAL expression or a very subtle, closed-mouth smile. ABSOLUTELY NO open mouths, NO visible teeth, and NO big smiles or laughing. Extreme expressions will severely break the subsequent face-mapping algorithm.
-CRITICAL DESIGN: Generate an ultra-realistic photograph that looks like it was taken with a professional DSLR camera (Canon EOS R5 or Sony A7R IV).
-Maintain the EXACT facial features, skin tone, hair, body proportions and unique characteristics from the reference images.
-Photo style: 35mm f/1.4 lens, shallow depth of field, natural golden hour lighting, 
-warm film color grading, genuine skin textures with pores visible, natural hair strands,
-realistic fabric wrinkles on clothing, ambient light reflections in eyes.
-Do NOT make it look like AI art, CGI, or illustration. It must look like a real photograph taken by a professional wedding photographer.
+CRITICAL DESIGN: Generate an ultra-realistic photograph that looks like it was taken with a professional DSLR camera.
+Maintain the EXACT facial features, skin tone, hair, realistic body proportions and unique characteristics from the reference images based on their ACTUAL apparent age.
+Photo style: 35mm f/1.4 lens, shallow depth of field, natural golden hour lighting, warm film color grading, genuine skin textures with pores and true-to-life age visible, natural hair strands.
+Do NOT make it look like AI art, CGI, or illustration. It must look like a real, raw photograph taken by a professional wedding photographer.
 `.trim();
 
 export type SnapshotTheme =
